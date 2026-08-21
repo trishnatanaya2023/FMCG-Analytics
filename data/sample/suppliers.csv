@@ -1,0 +1,6 @@
+supplier_id,name,lead_time,minimum_order_quantity
+SUP-001,SunVale Distribution,4,12
+SUP-002,FreshField Distribution,12,24
+SUP-003,DailyDrop Distribution,10,10
+SUP-004,HarvestCo Distribution,8,20
+SUP-005,GoodBasket Distribution,8,6

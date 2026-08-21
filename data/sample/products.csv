@@ -1,0 +1,51 @@
+product_id,name,brand,category,purchase_price,selling_price,shelf_life,supplier_id
+SKU-001,SunVale Biscuits 1,SunVale,Biscuits,129.16,156.06,365,SUP-001
+SKU-002,FreshField Beverages 2,FreshField,Beverages,175.9,247.73,180,SUP-002
+SKU-003,DailyDrop Snacks 3,DailyDrop,Snacks,33.52,44.08,365,SUP-003
+SKU-004,HarvestCo Dairy 4,HarvestCo,Dairy,74.29,108.32,365,SUP-004
+SKU-005,GoodBasket Staples 5,GoodBasket,Staples,150.22,197.24,180,SUP-005
+SKU-006,SunVale Personal Care 6,SunVale,Personal Care,50.18,67.56,365,SUP-001
+SKU-007,FreshField Home Care 7,FreshField,Home Care,151.04,206.85,60,SUP-002
+SKU-008,DailyDrop Confectionery 8,DailyDrop,Confectionery,139.36,179.27,60,SUP-003
+SKU-009,HarvestCo Breakfast 9,HarvestCo,Breakfast,162.04,229.05,365,SUP-004
+SKU-010,GoodBasket Baby Care 10,GoodBasket,Baby Care,44.7,59.0,90,SUP-005
+SKU-011,SunVale Biscuits 11,SunVale,Biscuits,37.92,52.52,60,SUP-001
+SKU-012,FreshField Beverages 12,FreshField,Beverages,137.12,201.6,90,SUP-002
+SKU-013,DailyDrop Snacks 13,DailyDrop,Snacks,74.24,98.06,90,SUP-003
+SKU-014,HarvestCo Dairy 14,HarvestCo,Dairy,43.83,53.43,180,SUP-004
+SKU-015,GoodBasket Staples 15,GoodBasket,Staples,50.12,69.21,90,SUP-005
+SKU-016,SunVale Personal Care 16,SunVale,Personal Care,85.44,122.16,180,SUP-001
+SKU-017,FreshField Home Care 17,FreshField,Home Care,64.48,92.19,180,SUP-002
+SKU-018,DailyDrop Confectionery 18,DailyDrop,Confectionery,147.2,190.81,365,SUP-003
+SKU-019,HarvestCo Breakfast 19,HarvestCo,Breakfast,126.66,154.77,90,SUP-004
+SKU-020,GoodBasket Baby Care 20,GoodBasket,Baby Care,45.58,53.89,365,SUP-005
+SKU-021,SunVale Biscuits 21,SunVale,Biscuits,123.69,172.12,365,SUP-001
+SKU-022,FreshField Beverages 22,FreshField,Beverages,143.16,188.64,180,SUP-002
+SKU-023,DailyDrop Snacks 23,DailyDrop,Snacks,35.49,43.1,180,SUP-003
+SKU-024,HarvestCo Dairy 24,HarvestCo,Dairy,124.29,164.23,365,SUP-004
+SKU-025,GoodBasket Staples 25,GoodBasket,Staples,140.52,192.57,180,SUP-005
+SKU-026,SunVale Personal Care 26,SunVale,Personal Care,105.0,141.52,365,SUP-001
+SKU-027,FreshField Home Care 27,FreshField,Home Care,17.18,22.52,90,SUP-002
+SKU-028,DailyDrop Confectionery 28,DailyDrop,Confectionery,48.05,62.59,365,SUP-003
+SKU-029,HarvestCo Breakfast 29,HarvestCo,Breakfast,51.3,61.43,365,SUP-004
+SKU-030,GoodBasket Baby Care 30,GoodBasket,Baby Care,59.27,75.16,90,SUP-005
+SKU-031,SunVale Biscuits 31,SunVale,Biscuits,105.58,149.41,180,SUP-001
+SKU-032,FreshField Beverages 32,FreshField,Beverages,123.6,160.92,90,SUP-002
+SKU-033,DailyDrop Snacks 33,DailyDrop,Snacks,40.05,47.53,365,SUP-003
+SKU-034,HarvestCo Dairy 34,HarvestCo,Dairy,27.13,37.89,180,SUP-004
+SKU-035,GoodBasket Staples 35,GoodBasket,Staples,39.09,52.0,90,SUP-005
+SKU-036,SunVale Personal Care 36,SunVale,Personal Care,37.59,52.21,90,SUP-001
+SKU-037,FreshField Home Care 37,FreshField,Home Care,76.01,96.57,90,SUP-002
+SKU-038,DailyDrop Confectionery 38,DailyDrop,Confectionery,117.89,151.91,365,SUP-003
+SKU-039,HarvestCo Breakfast 39,HarvestCo,Breakfast,31.82,46.73,60,SUP-004
+SKU-040,GoodBasket Baby Care 40,GoodBasket,Baby Care,164.64,228.84,90,SUP-005
+SKU-041,SunVale Biscuits 41,SunVale,Biscuits,174.82,247.13,90,SUP-001
+SKU-042,FreshField Beverages 42,FreshField,Beverages,132.44,174.13,180,SUP-002
+SKU-043,DailyDrop Snacks 43,DailyDrop,Snacks,28.19,40.9,90,SUP-003
+SKU-044,HarvestCo Dairy 44,HarvestCo,Dairy,88.57,109.89,180,SUP-004
+SKU-045,GoodBasket Staples 45,GoodBasket,Staples,109.31,134.78,90,SUP-005
+SKU-046,SunVale Personal Care 46,SunVale,Personal Care,155.91,219.45,90,SUP-001
+SKU-047,FreshField Home Care 47,FreshField,Home Care,84.59,115.74,180,SUP-002
+SKU-048,DailyDrop Confectionery 48,DailyDrop,Confectionery,110.13,151.42,180,SUP-003
+SKU-049,HarvestCo Breakfast 49,HarvestCo,Breakfast,81.86,97.62,60,SUP-004
+SKU-050,GoodBasket Baby Care 50,GoodBasket,Baby Care,94.99,121.49,180,SUP-005
