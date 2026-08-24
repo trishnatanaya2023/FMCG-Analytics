@@ -11,12 +11,13 @@ The project is intentionally explainable. Forecasts expose their selected baseli
 ## What is included
 
 - A reproducible sample dataset with 50 products, 10 categories, 5 brands, 5 suppliers, 100 retailers, 365 days of sales, and batch-level inventory.
-- Streamlit workspaces for executive metrics, sales, demand forecasting, inventory, reorder planning, expiry management, retailer analytics, supplier analytics, and alerts.
-- A FastAPI service with JWT authentication, product/sales/inventory reads, demand forecasts, reorder recommendation generation, recommendation decisions, and CSV upload validation.
+- Streamlit workspaces for executive metrics, sales, demand forecasting, inventory, reorder planning, expiry management, retailer analytics, supplier analytics, and alerts. The Executive Dashboard presents its eight KPIs in a responsive two-column grid.
+- A FastAPI service with JWT authentication, product/sales/inventory reads, demand forecasts, reorder recommendation generation, recommendation decisions, and CSV upload validation. Product and sales responses retain numeric money fields and add Indian Rupee formatted fields for display clients.
 - SQLAlchemy models for users, products, suppliers, retailers, sales, inventory batches, forecasts, reorder recommendations, and alerts.
 - CSV ingestion for suppliers, products, retailers, inventory, and sales. Uploads are validated before processing and are rolled back if a row cannot be ingested.
 - SQLite as the default local database and PostgreSQL support through `psycopg2`.
-- Pytest coverage for core forecasting, inventory, validation, authentication, and ingestion behavior.
+- A shared Indian Rupee formatter for dashboard KPIs, tables, chart labels, and API display fields.
+- Pytest coverage for forecasting preparation and metrics, inventory and expiry calculations, analytics aggregations, currency formatting, validation, authentication, and ingestion behavior.
 
 ## Architecture
 
@@ -26,7 +27,7 @@ The project is intentionally explainable. Forecasts expose their selected baseli
 												 | app/dashboard/       |
 												 +----------+-----------+
 																		|
-								 direct reads      | shared service functions
+									 data loading      | shared service functions
 							data/sample/*.csv    |
 																		v
 												 +----------------------+
@@ -56,9 +57,9 @@ The project is intentionally explainable. Forecasts expose their selected baseli
 
 | Area | Responsibility |
 | --- | --- |
-| `app/dashboard/` | Streamlit presentation layer. Loads sample CSVs and calls analytics, forecasting, and inventory services for interactive views. |
+| `app/dashboard/` | Streamlit presentation layer. Calls data-loading, analytics, forecasting, inventory, supplier, and formatting services and renders interactive views. |
 | `app/api/` | FastAPI HTTP boundary, request validation, authentication dependencies, response shaping, and CSV upload handling. |
-| `app/services/` | Framework-independent business logic. This is where forecasting, inventory policy, recommendation generation, analytics, authentication, and ingestion rules live. |
+| `app/services/` | Framework-independent business logic and data preparation. This is where analytics, currency formatting, sample-data loading, forecasting, inventory policy, recommendation generation, supplier summaries, authentication, and ingestion rules live. |
 | `app/models/` | SQLAlchemy persistence models and relationships. |
 | `app/database/` | Engine and session setup. Database selection comes from `DATABASE_URL`. |
 | `scripts/` | Generate fixtures, create tables, and create or reset a user. |
@@ -69,7 +70,7 @@ The project is intentionally explainable. Forecasts expose their selected baseli
 
 There are two deliberately separate paths in this MVP:
 
-- **Dashboard and read-only API data:** the dashboard and `/products`, `/sales`, and `/inventory` endpoints read CSV files from `data/sample/`. Generate these files before starting either consumer.
+- **Dashboard and read-only API data:** the dashboard and `/products`, `/sales`, and `/inventory` endpoints use CSV files from `data/sample/` through their data-loading/service boundaries. Generate these files before starting either consumer.
 - **Operational database data:** authentication, CSV uploads, reorder recommendations, and recommendation decisions use SQLAlchemy and the configured database. Generating CSVs does not automatically load them into the database; use `/data/upload` or an ingestion service call for that.
 
 ## Forecasting and replenishment logic
@@ -97,6 +98,10 @@ For each active product, the recommendation service:
 
 The result includes a risk level, estimated stockout date, recommended quantity, and a human-readable reason. Recommendations can be approved, modified, or rejected through the API.
 
+### Currency display
+
+All user-facing currency is displayed as Indian Rupees using lakh/crore grouping through `app/services/formatting.py`. Examples include `₹1,23,456` and `₹1,00,00,000`. The formatter is used by dashboard KPI cards, revenue charts, profitability/expiry/retailer tables, and formatted API fields. Raw numeric API money fields remain available for calculations and backward compatibility.
+
 ## Project layout
 
 ```text
@@ -107,6 +112,9 @@ app/
 	database/session.py         SQLAlchemy engine and sessions
 	models/domain.py            Database entities
 	services/                   Business logic
+	services/data_loading.py    Sample CSV loading and preparation
+	services/formatting.py      Shared Indian Rupee formatting
+	services/suppliers.py       Supplier summaries
 data/sample/                  Generated CSV fixtures
 scripts/                      Local setup and data utilities
 tests/                        Automated tests
@@ -226,6 +234,8 @@ Protected routes require `Authorization: Bearer <token>` after logging in.
 | `GET` | `/reorder-recommendations?status=generated` | List recommendations, optionally by status. |
 | `PATCH` | `/reorder-recommendations/{id}` | Approve, modify, or reject a recommendation. |
 
+Money-bearing `/products` and `/sales` records retain numeric fields such as `purchase_price` and `selling_price`, and include formatted display fields such as `purchase_price_formatted` and `selling_price_formatted` using Indian Rupee grouping.
+
 Example login and authenticated request:
 
 ```powershell
@@ -260,7 +270,7 @@ Install the requirements, then run:
 python -m pytest -q
 ```
 
-The suite covers inventory formulas and stockout behavior, forecast metrics, profitability, CSV validation, transactional ingestion, JWT login, and authenticated API access.
+The suite covers inventory formulas and stockout behavior, configured expiry thresholds, forecast preparation and metrics, profitability and analytics aggregations, Indian currency formatting, CSV validation, transactional ingestion, JWT login, authenticated API access, and recommendation lifecycle behavior. The current suite contains 26 tests.
 
 ## Current MVP boundaries
 

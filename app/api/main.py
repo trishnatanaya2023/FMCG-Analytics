@@ -7,6 +7,7 @@ from app.database.session import get_db
 from app.models.domain import ReorderRecommendation
 from app.services.auth import authenticate_user, create_access_token, get_current_user
 from app.services.forecasting import forecast_product_from_csv, normalize_forecast_horizon
+from app.services.formatting import format_currency
 from app.services.ingestion import IngestionError, ingest_dataframe
 from app.services.recommendations import generate_recommendations, list_recommendations, update_recommendation
 from app.services.validation import validate_csv
@@ -71,7 +72,11 @@ def login(credentials: LoginRequest, db: Session = Depends(get_db)):
 
 @app.get("/products")
 def products(_: object = Depends(get_current_user)):
-    return read_csv("products.csv").to_dict(orient="records")
+    records = read_csv("products.csv").to_dict(orient="records")
+    for record in records:
+        record["purchase_price_formatted"] = format_currency(record["purchase_price"], 2)
+        record["selling_price_formatted"] = format_currency(record["selling_price"], 2)
+    return records
 
 
 @app.get("/sales")
@@ -79,7 +84,10 @@ def sales(product_id: str | None = None, _: object = Depends(get_current_user)):
     data = read_csv("sales.csv")
     if product_id:
         data = data[data.product_id == product_id]
-    return data.to_dict(orient="records")
+    records = data.to_dict(orient="records")
+    for record in records:
+        record["selling_price_formatted"] = format_currency(record["selling_price"], 2)
+    return records
 
 
 @app.get("/inventory")

@@ -1,9 +1,12 @@
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import pandas as pd
+import plotly.graph_objects as go
 import plotly.express as px
 import streamlit as st
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from app.services.formatting import format_currency, format_currency_columns
 from app.database.session import SessionLocal
 from app.services.auth import authenticate_user, create_access_token
 from app.services.analytics import (category_revenue, daily_sales_revenue, product_profitability,
@@ -12,7 +15,7 @@ from app.services.data_loading import load_sample_data
 from app.services.forecasting import (build_product_demand_history, forecast_daily,
                                       get_product_ids, get_forecast_horizon_options, latest_daily_demand)
 from app.services.inventory import (calculate_inventory_value, expiry_analysis, expiry_risk_count,
-                                    inventory_overview, critical_expiry_items)
+                                    inventory_overview, critical_expiry_items, stockout_risk_count)
 from app.services.suppliers import supplier_product_counts, supplier_product_summary
 
 st.set_page_config(page_title="DistribuSense", page_icon="DS", layout="wide")
@@ -22,7 +25,9 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap');
 html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
 h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
-[data-testid="stMetric"] { background: #f4f7f2; border-left: 4px solid #1f7a5a; padding: 14px; border-radius: 6px; }
+[data-testid="stMetric"] { background: #f4f7f2; border-left: 4px solid #1f7a5a; padding: 12px; border-radius: 6px; min-width: 0; }
+[data-testid="stMetricLabel"], [data-testid="stMetricValue"] { min-width: 0; overflow: visible; white-space: normal; overflow-wrap: anywhere; }
+[data-testid="stMetricValue"] { font-size: 1.15rem !important; line-height: 1.15; }
 .alert { padding: 12px 16px; border-radius: 5px; margin: 6px 0; background: #fff4df; border-left: 4px solid #e39b21; }
 </style>
 """, unsafe_allow_html=True)
@@ -70,12 +75,26 @@ summary = sales_summary(sales)
 if page == "Executive Dashboard":
     st.title("What needs action today?")
     st.caption(f"Operating view through {sales.date.max().date()}")
-    cols = st.columns(8)
-    values = [("Revenue", f"₹{summary['revenue']:,.0f}"), ("Orders", f"{summary['orders']:,}"), ("Units sold", f"{summary['units']:,}"), ("Inventory value", f"₹{calculate_inventory_value(inventory, products):,.0f}"), ("Gross margin", f"{summary['margin']:.1f}%"), ("Active retailers", f"{summary['active_retailers']:,}"), ("Stockout risk", "Review"), ("Expiry risk", f"{expiry_risk_count(inventory):,}")]
-    for col, (label, value) in zip(cols, values): col.metric(label, value)
+    values = [("Revenue", format_currency(summary["revenue"])), ("Orders", f"{summary['orders']:,}"), ("Units sold", f"{summary['units']:,}"), ("Inventory value", format_currency(calculate_inventory_value(inventory, products))), ("Gross margin", f"{summary['margin']:.1f}%"), ("Active retailers", f"{summary['active_retailers']:,}"), ("Stockout risk", f"{stockout_risk_count(products, sales, inventory, suppliers):,}"), ("Expiry risk", f"{expiry_risk_count(inventory):,}")]
+    for row_start in range(0, len(values), 2):
+        cols = st.columns(2)
+        for col, (label, value) in zip(cols, values[row_start:row_start + 2]):
+            col.metric(label, value)
     st.subheader("Sales pulse")
     daily = daily_sales_revenue(sales)
-    st.plotly_chart(px.line(daily, x="date", y=["revenue", "units"], title="Daily revenue and units"), use_container_width=True)
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=daily.date, y=daily.revenue, name="Revenue",
+                             hovertemplate="%{x|%d %b %Y}<br>Revenue: %{customdata}<extra></extra>",
+                             customdata=[format_currency(value) for value in daily.revenue]))
+    fig.add_trace(go.Scatter(x=daily.date, y=daily.units, name="Units", yaxis="y2",
+                             hovertemplate="%{x|%d %b %Y}<br>Units: %{y:,.0f}<extra></extra>"))
+    revenue_ticks = daily.revenue.quantile([index / 5 for index in range(6)]).drop_duplicates().tolist()
+    fig.update_layout(title="Daily revenue and units", yaxis=dict(title="Revenue (₹)",
+                      tickmode="array", tickvals=revenue_ticks,
+                      ticktext=[format_currency(value) for value in revenue_ticks], nticks=6),
+                      yaxis2=dict(title="Units", overlaying="y", side="right"),
+                      margin=dict(l=110, r=90))
+    st.plotly_chart(fig, use_container_width=True)
     st.subheader("Priority alerts")
     expiry = expiry_analysis(inventory, products).query("risk == 'Critical'").sort_values("expiry_date").head(5)
     for row in expiry.itertuples(): st.markdown(f'<div class="alert">Expiry risk: <b>{row.product_id}</b> has {row.quantity:,} units expiring on {row.expiry_date.date()}. Prioritize FEFO dispatch or promotion.</div>', unsafe_allow_html=True)
@@ -85,9 +104,18 @@ elif page == "Sales Analytics":
     category = st.multiselect("Categories", get_categories(products), default=get_categories(products))
     filtered = sales[sales.category.isin(category)]
     revenue = category_revenue(filtered)
-    st.plotly_chart(px.bar(revenue, x="category", y="revenue", title="Revenue by category"), use_container_width=True)
+    fig = px.bar(revenue, x="category", y="revenue", title="Revenue by category",
+                 custom_data=[revenue.revenue.map(format_currency)])
+    category_ticks = revenue.revenue.quantile([index / 5 for index in range(6)]).drop_duplicates().tolist()
+    fig.update_traces(hovertemplate="%{x}<br>Revenue: %{customdata[0]}<extra></extra>")
+    fig.update_yaxes(title="Revenue (₹)", tickmode="array", tickvals=category_ticks,
+                     ticktext=[format_currency(value) for value in category_ticks], nticks=6,
+                     automargin=True)
+    fig.update_layout(margin=dict(l=110, r=40))
+    st.plotly_chart(fig, use_container_width=True)
     profit = product_profitability(filtered, products)
-    st.dataframe(profit.sort_values("gross_profit", ascending=False), use_container_width=True, hide_index=True)
+    st.dataframe(format_currency_columns(profit.sort_values("gross_profit", ascending=False),
+                                         ["revenue", "purchase_cost", "gross_profit"]), use_container_width=True, hide_index=True)
 
 elif page == "Demand Forecast":
     st.title("Demand Forecast")
@@ -113,12 +141,14 @@ elif page in ["Inventory Intelligence", "Reorder Planning"]:
 elif page == "Expiry Management":
     st.title("Expiry Management | FEFO queue")
     view = expiry_analysis(inventory, products)
-    st.dataframe(view.sort_values("expiry_date"), use_container_width=True, hide_index=True)
+    st.dataframe(format_currency_columns(view.sort_values("expiry_date"),
+                                         ["purchase_price", "value_at_risk"]), use_container_width=True, hide_index=True)
 
 elif page == "Retailer Analytics":
     st.title("Retailer Analytics")
     view = retailer_summary(sales)
-    st.dataframe(view.sort_values("revenue", ascending=False), use_container_width=True, hide_index=True)
+    st.dataframe(format_currency_columns(view.sort_values("revenue", ascending=False),
+                                         ["revenue", "average_order_value"]), use_container_width=True, hide_index=True)
 
 elif page == "Supplier Analytics":
     st.title("Supplier Analytics")
@@ -127,4 +157,5 @@ elif page == "Supplier Analytics":
 else:
     st.title("Alert Center")
     st.info("Alerts are derived from the same inventory, expiry, demand, and credit calculations shown in each workspace.")
-    st.dataframe(critical_expiry_items(inventory, products), use_container_width=True, hide_index=True)
+    st.dataframe(format_currency_columns(critical_expiry_items(inventory, products),
+                                         ["purchase_price", "value_at_risk"]), use_container_width=True, hide_index=True)

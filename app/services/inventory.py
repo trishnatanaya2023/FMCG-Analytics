@@ -134,6 +134,12 @@ def inventory_overview(products: pd.DataFrame, sales: pd.DataFrame, inventory: p
     return pd.DataFrame(rows)
 
 
+def stockout_risk_count(products: pd.DataFrame, sales: pd.DataFrame, inventory: pd.DataFrame,
+                        suppliers: pd.DataFrame, settings: Settings | None = None) -> int:
+    overview = inventory_overview(products, sales, inventory, suppliers, settings)
+    return int(overview["Risk"].isin(["Critical", "High Risk", "Warning"]).sum())
+
+
 def critical_expiry_items(inventory: pd.DataFrame, products: pd.DataFrame,
                           as_of: date | None = None) -> pd.DataFrame:
     settings = get_settings()

@@ -18,6 +18,7 @@ from app.services.inventory import (
     expiry_risk_count,
 )
 from app.services.validation import validate_csv
+from app.services.formatting import format_currency
 
 
 def test_reorder_point_normal_case():
@@ -67,6 +68,13 @@ def test_forecast_accuracy_metrics_known_values():
     assert metrics["mae"] == 20
     assert math.isclose(metrics["rmse"], math.sqrt(1400 / 3), rel_tol=1e-9)
     assert math.isclose(metrics["mape"], 10, rel_tol=1e-9)
+
+
+def test_format_currency_uses_indian_grouping():
+    assert format_currency(60987) == "₹60,987"
+    assert format_currency(123456) == "₹1,23,456"
+    assert format_currency(10000000) == "₹1,00,00,000"
+    assert format_currency(2390.5, 2) == "₹2,390.50"
 
 
 def test_forecasting_preparation_fills_dates_and_normalizes_horizon():
