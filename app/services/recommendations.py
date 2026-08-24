@@ -50,6 +50,13 @@ def generate_recommendations(db: Session, as_of: date | None = None) -> list[Reo
     return generated
 
 
+def list_recommendations(db: Session, status: str | None = None) -> list[ReorderRecommendation]:
+    query = select(ReorderRecommendation).order_by(ReorderRecommendation.created_at.desc())
+    if status:
+        query = query.where(ReorderRecommendation.status == status)
+    return list(db.scalars(query).all())
+
+
 def update_recommendation(db: Session, recommendation_id: int, action: str, quantity: int | None = None) -> ReorderRecommendation:
     with db.begin():
         recommendation = db.get(ReorderRecommendation, recommendation_id)

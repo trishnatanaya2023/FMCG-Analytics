@@ -2,14 +2,13 @@ from pathlib import Path
 import pandas as pd
 from fastapi import Depends, FastAPI, Form, HTTPException, UploadFile, File
 from pydantic import BaseModel, Field
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.models.domain import ReorderRecommendation
 from app.services.auth import authenticate_user, create_access_token, get_current_user
-from app.services.forecasting import forecast_daily
+from app.services.forecasting import forecast_product_from_csv, normalize_forecast_horizon
 from app.services.ingestion import IngestionError, ingest_dataframe
-from app.services.recommendations import generate_recommendations, update_recommendation
+from app.services.recommendations import generate_recommendations, list_recommendations, update_recommendation
 from app.services.validation import validate_csv
 
 app = FastAPI(title="DistribuSense API", version="0.1.0")
@@ -96,10 +95,7 @@ def generate_reorder_recommendations(db: Session = Depends(get_db), _: object = 
 
 @app.get("/reorder-recommendations")
 def list_reorder_recommendations(status: str | None = None, db: Session = Depends(get_db), _: object = Depends(get_current_user)):
-    query = select(ReorderRecommendation).order_by(ReorderRecommendation.created_at.desc())
-    if status:
-        query = query.where(ReorderRecommendation.status == status)
-    return [_recommendation_payload(item) for item in db.scalars(query).all()]
+    return [_recommendation_payload(item) for item in list_recommendations(db, status)]
 
 
 @app.patch("/reorder-recommendations/{recommendation_id}")
@@ -113,12 +109,11 @@ def act_on_recommendation(recommendation_id: int, action: RecommendationAction, 
 
 @app.get("/forecast/{product_id}")
 def forecast(product_id: str, horizon: int = 30, _: object = Depends(get_current_user)):
-    data = read_csv("sales.csv")
-    data["date"] = pd.to_datetime(data.date)
-    history = data[data.product_id == product_id].groupby("date").quantity.sum().asfreq("D", fill_value=0)
-    if history.empty:
-        raise HTTPException(404, "Product not found or has no sales")
-    result = forecast_daily(history, min(max(horizon, 1), 60))
+    clamped_horizon = normalize_forecast_horizon(horizon)
+    try:
+        result = forecast_product_from_csv(ROOT, product_id, clamped_horizon)
+    except ValueError as exc:
+        raise HTTPException(404, str(exc)) from exc
     return {"product_id": product_id, "model": result.model_name, "mae": result.mae, "rmse": result.rmse, "forecast": [{"date": str(day.date()), "units": units, "lower": lower, "upper": upper} for day, units, lower, upper in zip(result.dates, result.values, result.lower, result.upper)]}
 
 

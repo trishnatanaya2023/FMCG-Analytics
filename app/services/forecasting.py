@@ -5,6 +5,38 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 
 
+def build_product_demand_history(sales: pd.DataFrame, product_id: str, as_of=None) -> pd.Series:
+    data = sales.copy()
+    data["date"] = pd.to_datetime(data["date"])
+    history = data[data.product_id == product_id].groupby("date").quantity.sum()
+    if as_of is not None and not history.empty:
+        history = history[history.index <= pd.Timestamp(as_of)]
+    if history.empty:
+        return pd.Series(dtype=float)
+    return history.asfreq("D", fill_value=0)
+
+
+def latest_daily_demand(sales: pd.DataFrame, days: int = 30) -> pd.Series:
+    data = sales.copy()
+    data["date"] = pd.to_datetime(data["date"])
+    if data.empty:
+        return pd.Series(dtype=float)
+    cutoff = data.date.max() - pd.Timedelta(days=days)
+    return data[data.date >= cutoff].groupby("product_id").quantity.sum().div(days)
+
+
+def normalize_forecast_horizon(horizon: int) -> int:
+    return min(max(int(horizon), 1), 60)
+
+
+def get_product_ids(products: pd.DataFrame) -> list[int]:
+    return products.product_id.tolist()
+
+
+def get_forecast_horizon_options() -> list[int]:
+    return [7, 14, 30, 60]
+
+
 @dataclass(frozen=True)
 class ForecastResult:
     dates: list[pd.Timestamp]
@@ -74,3 +106,11 @@ def forecast_daily(history: pd.Series, horizon: int = 30) -> ForecastResult:
     spread = max(1.0, float(np.std(values.to_numpy())) if len(values) > 1 else float(future.mean() * 0.2))
     return ForecastResult(dates, future.tolist(), np.maximum(0, future - 1.96 * spread).tolist(),
                           (future + 1.96 * spread).tolist(), model_name, mae, rmse, mape)
+
+
+def forecast_product_from_csv(root, product_id: str, horizon: int = 30) -> "ForecastResult":
+    sales = pd.read_csv(root / "sales.csv")
+    history = build_product_demand_history(sales, product_id)
+    if history.empty:
+        raise ValueError("Product not found or has no sales")
+    return forecast_daily(history, normalize_forecast_horizon(horizon))

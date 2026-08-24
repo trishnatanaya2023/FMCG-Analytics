@@ -2,6 +2,11 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from math import ceil
 
+import pandas as pd
+
+from app.config import Settings, get_settings
+from app.services.forecasting import latest_daily_demand
+
 
 @dataclass(frozen=True)
 class InventoryPolicy:
@@ -73,3 +78,65 @@ def calculate_inventory_position(current_stock: int, reserved_stock: int, incomi
         reason = f"No order needed: available inventory plus incoming stock covers the 30-day target of {target_stock} units."
     return InventoryPosition(current_stock, reserved_stock, incoming_stock, average, daily_forecast,
                              safety, reorder_point, days_remaining, stockout_date, risk, order_quantity, reason)
+
+
+def calculate_inventory_value(inventory: pd.DataFrame, products: pd.DataFrame) -> float:
+    valued = inventory.merge(products[["product_id", "purchase_price"]], on="product_id")
+    return float((valued["quantity"] * valued["purchase_price"]).sum())
+
+
+def expiry_analysis(inventory: pd.DataFrame, products: pd.DataFrame,
+                    as_of: date | None = None, settings: Settings | None = None) -> pd.DataFrame:
+    as_of = as_of or date.today()
+    settings = settings or get_settings()
+    view = inventory.merge(products[["product_id", "name", "purchase_price"]], on="product_id")
+    view["days_until_expiry"] = (pd.to_datetime(view.expiry_date).dt.date - as_of).apply(lambda value: value.days)
+    view["risk"] = pd.cut(
+        view.days_until_expiry,
+        [-float("inf"), settings.expiry_critical_days, settings.expiry_warning_days,
+         settings.expiry_monitor_days, float("inf")],
+        labels=["Critical", "Warning", "Monitor", "Healthy"],
+    )
+    view["value_at_risk"] = view.quantity * view.purchase_price
+    return view
+
+
+def expiry_risk_count(inventory: pd.DataFrame, settings: Settings | None = None,
+                      as_of: date | None = None) -> int:
+    settings = settings or get_settings()
+    as_of = as_of or date.today()
+    expiry_dates = pd.to_datetime(inventory.expiry_date).dt.date
+    return int((expiry_dates <= as_of + timedelta(days=settings.expiry_critical_days)).sum())
+
+
+def inventory_overview(products: pd.DataFrame, sales: pd.DataFrame, inventory: pd.DataFrame,
+                       suppliers: pd.DataFrame, settings: Settings | None = None) -> pd.DataFrame:
+    settings = settings or get_settings()
+    latest = latest_daily_demand(sales)
+    supplier_values = suppliers.set_index("supplier_id")
+    rows = []
+    for product in products.itertuples():
+        batches = inventory[inventory.product_id == product.product_id]
+        supplier = supplier_values.loc[product.supplier_id]
+        demand = float(latest.get(product.product_id, 0))
+        policy = InventoryPolicy(int(supplier.lead_time), settings.safety_stock_days,
+                                 int(supplier.minimum_order_quantity))
+        position = calculate_inventory_position(
+            int(batches.quantity.sum()), 0, 0, [demand] * 30, demand * 30, policy)
+        rows.append({"Product": product.name, "SKU": product.product_id,
+                     "Stock": position.current_stock,
+                     "Daily demand": round(position.forecast_daily_demand, 1),
+                     "Reorder point": position.reorder_point,
+                     "Days left": round(position.days_remaining, 1) if position.days_remaining is not None else None,
+                     "Risk": position.risk_level,
+                     "Recommended order": position.recommended_order_quantity,
+                     "Reason": position.reason})
+    return pd.DataFrame(rows)
+
+
+def critical_expiry_items(inventory: pd.DataFrame, products: pd.DataFrame,
+                          as_of: date | None = None) -> pd.DataFrame:
+    settings = get_settings()
+    as_of = as_of or date.today()
+    view = expiry_analysis(inventory, products, as_of, settings)
+    return view.query("risk == 'Critical'")

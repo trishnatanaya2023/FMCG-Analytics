@@ -51,6 +51,10 @@ def test_recommendation_lifecycle_is_persisted():
     assert generated["forecast_demand"] > 0
     assert generated["reason"]
 
+    listed_response = client.get("/reorder-recommendations?status=generated")
+    assert listed_response.status_code == 200
+    assert listed_response.json()[0]["id"] == generated["id"]
+
     recommendation_id = generated["id"]
     modified_response = client.patch(f"/reorder-recommendations/{recommendation_id}", json={"action": "modified", "quantity": 25})
     assert modified_response.status_code == 200
