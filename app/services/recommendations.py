@@ -4,7 +4,7 @@ import pandas as pd
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.domain import InventoryBatch, Product, ReorderRecommendation, Sale
+from app.models.domain import InventoryStock, Product, ReorderRecommendation, Sale
 from app.services.inventory import InventoryPolicy, calculate_inventory_position
 
 
@@ -26,9 +26,9 @@ def generate_recommendations(db: Session, as_of: date | None = None) -> list[Reo
         products = db.scalars(select(Product).where(Product.active.is_(True))).all()
         for product in products:
             demand_history, forecast_demand = _forecast_demand(db, product.id, as_of)
-            batches = db.scalars(select(InventoryBatch).where(InventoryBatch.product_id == product.id)).all()
-            current_stock = sum(batch.quantity for batch in batches)
-            reserved_stock = sum(batch.reserved_quantity for batch in batches)
+            stock = db.scalar(select(InventoryStock).where(InventoryStock.product_id == product.id))
+            current_stock = stock.quantity if stock else 0
+            reserved_stock = stock.reserved_quantity if stock else 0
             policy = InventoryPolicy(product.supplier.lead_time_days, 3, product.supplier.minimum_order_quantity)
             position = calculate_inventory_position(current_stock, reserved_stock, 0, demand_history,
                                                     forecast_demand, policy, as_of)

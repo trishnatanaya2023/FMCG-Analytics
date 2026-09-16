@@ -5,7 +5,8 @@ import pandas as pd
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.domain import Brand, Category, InventoryBatch, Product, Retailer, Sale, Supplier
+from app.models.domain import (Brand, Category, Expense, InventoryStock, Product, Purchase, PurchaseItem,
+                               Retailer, RetailerPayment, Sale, Supplier, SupplierPayment)
 from app.services.validation import validate_csv
 
 
@@ -98,7 +99,7 @@ def _upsert_product(db: Session, row) -> str:
     if product is None:
         product = Product(product_id=str(row.product_id), name=str(row.name), category=category,
                           brand=brand, supplier=supplier, purchase_price=_number(row.purchase_price, "purchase_price"),
-                          selling_price=_number(row.selling_price, "selling_price"), shelf_life_days=int(_number(row.shelf_life, "shelf_life")))
+                          selling_price=_number(row.selling_price, "selling_price"))
         db.add(product)
         return "inserted"
     product.name = str(row.name)
@@ -107,15 +108,15 @@ def _upsert_product(db: Session, row) -> str:
     product.supplier = supplier
     product.purchase_price = _number(row.purchase_price, "purchase_price")
     product.selling_price = _number(row.selling_price, "selling_price")
-    product.shelf_life_days = int(_number(row.shelf_life, "shelf_life"))
     return "updated"
 
 
 def _upsert_retailer(db: Session, row) -> str:
     retailer = db.scalar(select(Retailer).where(Retailer.retailer_id == str(row.retailer_id)))
+    terms = getattr(row, "payment_terms_days", getattr(row, "payment_terms", None))
     values = {"name": str(row.name), "location": str(row.location),
               "credit_limit": _number(row.credit_limit, "credit_limit"),
-              "payment_terms_days": int(_number(row.payment_terms, "payment_terms"))}
+              "payment_terms_days": int(_number(terms, "payment_terms_days"))}
     if retailer is None:
         db.add(Retailer(retailer_id=str(row.retailer_id), **values))
         return "inserted"
@@ -126,30 +127,100 @@ def _upsert_retailer(db: Session, row) -> str:
 
 def _upsert_inventory(db: Session, row) -> str:
     product = _product(db, str(row.product_id))
-    batch = db.scalar(select(InventoryBatch).where(InventoryBatch.batch_id == str(row.batch_id)))
+    stock = db.scalar(select(InventoryStock).where(InventoryStock.product_id == product.id))
     values = {"product_id": product.id, "quantity": int(_number(row.quantity, "quantity")),
-              "manufacturing_date": _date(row.manufacturing_date), "expiry_date": _date(row.expiry_date)}
-    if batch is None:
-        db.add(InventoryBatch(batch_id=str(row.batch_id), **values))
+              "reserved_quantity": int(_number(row.reserved_quantity, "reserved_quantity"))}
+    if stock is None:
+        db.add(InventoryStock(**values))
         return "inserted"
     for key, value in values.items():
-        setattr(batch, key, value)
+        setattr(stock, key, value)
     return "updated"
 
 
 def _insert_sale(db: Session, row) -> str:
     product = _product(db, str(row.product_id))
-    retailer = _retailer(db, str(row.retailer_id))
+    retailer_id = None
+    retailer = None
+    raw_retailer_id = getattr(row, "retailer_id", None)
+    if raw_retailer_id is not None and not pd.isna(raw_retailer_id):
+        retailer_id = str(raw_retailer_id).strip()
+        retailer = _retailer(db, retailer_id)
     sale_date = _date(row.date)
     quantity = int(_number(row.quantity, "quantity"))
     selling_price = _number(row.selling_price, "selling_price")
-    duplicate = db.scalar(select(Sale).where(
-        Sale.sale_date == sale_date, Sale.product_id == product.id, Sale.retailer_id == retailer.id,
-        Sale.quantity == quantity, Sale.selling_price == selling_price))
+    duplicate_filter = [
+        Sale.sale_date == sale_date,
+        Sale.product_id == product.id,
+        Sale.quantity == quantity,
+        Sale.selling_price == selling_price,
+    ]
+    if retailer is not None:
+        duplicate_filter.append(Sale.retailer_id == retailer.id)
+    else:
+        duplicate_filter.append(Sale.retailer_id.is_(None))
+    duplicate = db.scalar(select(Sale).where(*duplicate_filter))
     if duplicate is not None:
         return "skipped"
-    db.add(Sale(sale_date=sale_date, product_id=product.id, retailer_id=retailer.id,
+    due_date = sale_date + pd.Timedelta(days=retailer.payment_terms_days) if retailer is not None else None
+    db.add(Sale(sale_date=sale_date, due_date=due_date, product_id=product.id, retailer_id=retailer.id if retailer is not None else None,
                 quantity=quantity, selling_price=selling_price, purchase_cost=product.purchase_price))
+    return "inserted"
+
+
+def _insert_expense(db: Session, row) -> str:
+    expense_id = str(row.expense_id)
+    if db.scalar(select(Expense).where(Expense.expense_id == expense_id)) is not None:
+        return "skipped"
+    db.add(Expense(expense_id=expense_id, date=_date(row.date), category=str(row.category),
+                   description=str(row.description), amount=_number(row.amount, "amount"),
+                   payment_method=str(row.payment_method)))
+    return "inserted"
+
+
+def _insert_supplier_payment(db: Session, row) -> str:
+    payment_id = str(row.payment_id)
+    if db.scalar(select(SupplierPayment).where(SupplierPayment.payment_id == payment_id)) is not None:
+        return "skipped"
+    supplier = _supplier(db, str(row.supplier_id))
+    db.add(SupplierPayment(payment_id=payment_id, date=_date(row.date), supplier_id=supplier.id,
+                           amount=_number(row.amount, "amount"), payment_method=str(row.payment_method)))
+    return "inserted"
+
+
+def _insert_retailer_payment(db: Session, row) -> str:
+    payment_id = str(row.payment_id)
+    if db.scalar(select(RetailerPayment).where(RetailerPayment.payment_id == payment_id)) is not None:
+        return "skipped"
+    retailer = _retailer(db, str(row.retailer_id))
+    db.add(RetailerPayment(payment_id=payment_id, date=_date(row.date), retailer_id=retailer.id,
+                           amount=_number(row.amount, "amount"), payment_method=str(row.payment_method)))
+    return "inserted"
+
+
+def _insert_purchase(db: Session, row) -> str:
+    purchase_id = str(row.purchase_id)
+    if db.scalar(select(Purchase).where(Purchase.purchase_id == purchase_id)) is not None:
+        return "skipped"
+    supplier = _supplier(db, str(row.supplier_id))
+    db.add(Purchase(purchase_id=purchase_id, date=_date(row.date), supplier=supplier,
+                    invoice_reference=str(row.invoice_reference),
+                    total_amount=_number(row.total_amount, "total_amount")))
+    return "inserted"
+
+
+def _insert_purchase_item(db: Session, row) -> str:
+    purchase_item_id = str(row.purchase_item_id)
+    if db.scalar(select(PurchaseItem).where(PurchaseItem.purchase_item_id == purchase_item_id)) is not None:
+        return "skipped"
+    purchase = db.scalar(select(Purchase).where(Purchase.purchase_id == str(row.purchase_id)))
+    if purchase is None:
+        raise IngestionError(f"Unknown purchase_id: {row.purchase_id}")
+    product = _product(db, str(row.product_id))
+    db.add(PurchaseItem(purchase_item_id=purchase_item_id, purchase=purchase, product=product,
+                        quantity=int(_number(row.quantity, "quantity")),
+                        unit_cost=_number(row.unit_cost, "unit_cost"),
+                        amount=_number(row.amount, "amount")))
     return "inserted"
 
 
@@ -161,7 +232,10 @@ def ingest_dataframe(db: Session, frame: pd.DataFrame, dataset_type: str) -> Ing
     received = len(frame)
     inserted = updated = skipped = 0
     handlers = {"suppliers": _upsert_supplier, "products": _upsert_product,
-                "retailers": _upsert_retailer, "inventory": _upsert_inventory, "sales": _insert_sale}
+                "retailers": _upsert_retailer, "inventory": _upsert_inventory, "sales": _insert_sale,
+                "expenses": _insert_expense, "supplier_payments": _insert_supplier_payment,
+                "retailer_payments": _insert_retailer_payment,
+                "purchases": _insert_purchase, "purchase_items": _insert_purchase_item}
     handler = handlers[dataset_type]
     try:
         with db.begin():

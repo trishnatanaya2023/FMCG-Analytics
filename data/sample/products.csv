@@ -1,51 +1,61 @@
-product_id,name,brand,category,purchase_price,selling_price,shelf_life,supplier_id
-SKU-001,SunVale Biscuits 1,SunVale,Biscuits,129.16,156.06,365,SUP-001
-SKU-002,FreshField Beverages 2,FreshField,Beverages,175.9,247.73,180,SUP-002
-SKU-003,DailyDrop Snacks 3,DailyDrop,Snacks,33.52,44.08,365,SUP-003
-SKU-004,HarvestCo Dairy 4,HarvestCo,Dairy,74.29,108.32,365,SUP-004
-SKU-005,GoodBasket Staples 5,GoodBasket,Staples,150.22,197.24,180,SUP-005
-SKU-006,SunVale Personal Care 6,SunVale,Personal Care,50.18,67.56,365,SUP-001
-SKU-007,FreshField Home Care 7,FreshField,Home Care,151.04,206.85,60,SUP-002
-SKU-008,DailyDrop Confectionery 8,DailyDrop,Confectionery,139.36,179.27,60,SUP-003
-SKU-009,HarvestCo Breakfast 9,HarvestCo,Breakfast,162.04,229.05,365,SUP-004
-SKU-010,GoodBasket Baby Care 10,GoodBasket,Baby Care,44.7,59.0,90,SUP-005
-SKU-011,SunVale Biscuits 11,SunVale,Biscuits,37.92,52.52,60,SUP-001
-SKU-012,FreshField Beverages 12,FreshField,Beverages,137.12,201.6,90,SUP-002
-SKU-013,DailyDrop Snacks 13,DailyDrop,Snacks,74.24,98.06,90,SUP-003
-SKU-014,HarvestCo Dairy 14,HarvestCo,Dairy,43.83,53.43,180,SUP-004
-SKU-015,GoodBasket Staples 15,GoodBasket,Staples,50.12,69.21,90,SUP-005
-SKU-016,SunVale Personal Care 16,SunVale,Personal Care,85.44,122.16,180,SUP-001
-SKU-017,FreshField Home Care 17,FreshField,Home Care,64.48,92.19,180,SUP-002
-SKU-018,DailyDrop Confectionery 18,DailyDrop,Confectionery,147.2,190.81,365,SUP-003
-SKU-019,HarvestCo Breakfast 19,HarvestCo,Breakfast,126.66,154.77,90,SUP-004
-SKU-020,GoodBasket Baby Care 20,GoodBasket,Baby Care,45.58,53.89,365,SUP-005
-SKU-021,SunVale Biscuits 21,SunVale,Biscuits,123.69,172.12,365,SUP-001
-SKU-022,FreshField Beverages 22,FreshField,Beverages,143.16,188.64,180,SUP-002
-SKU-023,DailyDrop Snacks 23,DailyDrop,Snacks,35.49,43.1,180,SUP-003
-SKU-024,HarvestCo Dairy 24,HarvestCo,Dairy,124.29,164.23,365,SUP-004
-SKU-025,GoodBasket Staples 25,GoodBasket,Staples,140.52,192.57,180,SUP-005
-SKU-026,SunVale Personal Care 26,SunVale,Personal Care,105.0,141.52,365,SUP-001
-SKU-027,FreshField Home Care 27,FreshField,Home Care,17.18,22.52,90,SUP-002
-SKU-028,DailyDrop Confectionery 28,DailyDrop,Confectionery,48.05,62.59,365,SUP-003
-SKU-029,HarvestCo Breakfast 29,HarvestCo,Breakfast,51.3,61.43,365,SUP-004
-SKU-030,GoodBasket Baby Care 30,GoodBasket,Baby Care,59.27,75.16,90,SUP-005
-SKU-031,SunVale Biscuits 31,SunVale,Biscuits,105.58,149.41,180,SUP-001
-SKU-032,FreshField Beverages 32,FreshField,Beverages,123.6,160.92,90,SUP-002
-SKU-033,DailyDrop Snacks 33,DailyDrop,Snacks,40.05,47.53,365,SUP-003
-SKU-034,HarvestCo Dairy 34,HarvestCo,Dairy,27.13,37.89,180,SUP-004
-SKU-035,GoodBasket Staples 35,GoodBasket,Staples,39.09,52.0,90,SUP-005
-SKU-036,SunVale Personal Care 36,SunVale,Personal Care,37.59,52.21,90,SUP-001
-SKU-037,FreshField Home Care 37,FreshField,Home Care,76.01,96.57,90,SUP-002
-SKU-038,DailyDrop Confectionery 38,DailyDrop,Confectionery,117.89,151.91,365,SUP-003
-SKU-039,HarvestCo Breakfast 39,HarvestCo,Breakfast,31.82,46.73,60,SUP-004
-SKU-040,GoodBasket Baby Care 40,GoodBasket,Baby Care,164.64,228.84,90,SUP-005
-SKU-041,SunVale Biscuits 41,SunVale,Biscuits,174.82,247.13,90,SUP-001
-SKU-042,FreshField Beverages 42,FreshField,Beverages,132.44,174.13,180,SUP-002
-SKU-043,DailyDrop Snacks 43,DailyDrop,Snacks,28.19,40.9,90,SUP-003
-SKU-044,HarvestCo Dairy 44,HarvestCo,Dairy,88.57,109.89,180,SUP-004
-SKU-045,GoodBasket Staples 45,GoodBasket,Staples,109.31,134.78,90,SUP-005
-SKU-046,SunVale Personal Care 46,SunVale,Personal Care,155.91,219.45,90,SUP-001
-SKU-047,FreshField Home Care 47,FreshField,Home Care,84.59,115.74,180,SUP-002
-SKU-048,DailyDrop Confectionery 48,DailyDrop,Confectionery,110.13,151.42,180,SUP-003
-SKU-049,HarvestCo Breakfast 49,HarvestCo,Breakfast,81.86,97.62,60,SUP-004
-SKU-050,GoodBasket Baby Care 50,GoodBasket,Baby Care,94.99,121.49,180,SUP-005
+product_id,name,brand,category,pack_size,units_per_pack,purchase_price,selling_price,supplier_id
+SKU-001,Wheat Atta 5kg x 6pc,Dhauli Basket,Atta & Flour,PKT,6,297.04,431.65,SUP-002
+SKU-002,Wheat Atta 5kg x 6pc,Dhauli Basket,Atta & Flour,PKT,6,361.07,505.53,SUP-003
+SKU-003,Wheat Atta 5kg x 6pc,Dhauli Basket,Atta & Flour,PKT,6,300.3,392.22,SUP-004
+SKU-004,Wheat Atta 10kg x 2pc,Mahanadi Pantry,Atta & Flour,PKT,2,614.83,885.04,SUP-003
+SKU-005,Wheat Atta 10kg x 2pc,Mahanadi Pantry,Atta & Flour,PKT,2,664.64,937.39,SUP-004
+SKU-006,Wheat Atta 10kg x 2pc,Mahanadi Pantry,Atta & Flour,PKT,2,628.08,781.1,SUP-005
+SKU-007,Maida 50kg,Kalinga Harvest,Atta & Flour,KG,50,1919.48,2299.29,SUP-004
+SKU-008,Maida 50kg,Kalinga Harvest,Atta & Flour,KG,50,2066.92,2804.53,SUP-005
+SKU-009,Maida 50kg,Kalinga Harvest,Atta & Flour,KG,50,2029.37,2596.11,SUP-006
+SKU-010,Suji Rava 25kg,Konark Choice,Atta & Flour,KG,25,1286.51,1839.8,SUP-005
+SKU-011,Suji Rava 25kg,Konark Choice,Atta & Flour,KG,25,1224.2,1511.27,SUP-006
+SKU-012,Suji Rava 25kg,Konark Choice,Atta & Flour,KG,25,1123.22,1339.18,SUP-007
+SKU-013,Sona Masuri Rice 25kg,Utkal Daily,Rice & Grains,KG,25,1097.69,1505.21,SUP-006
+SKU-014,Sona Masuri Rice 25kg,Utkal Daily,Rice & Grains,KG,25,1303.18,1890.79,SUP-007
+SKU-015,Sona Masuri Rice 25kg,Utkal Daily,Rice & Grains,KG,25,1157.39,1485.77,SUP-008
+SKU-016,Swarnamasuri Rice 30kg,Bhuban Fresh,Rice & Grains,KG,30,1332.31,1642.81,SUP-007
+SKU-017,Swarnamasuri Rice 30kg,Bhuban Fresh,Rice & Grains,KG,30,1201.89,1578.32,SUP-008
+SKU-018,Swarnamasuri Rice 30kg,Bhuban Fresh,Rice & Grains,KG,30,1239.13,1694.57,SUP-001
+SKU-019,Basmati Rice 25kg,Dhauli Basket,Rice & Grains,KG,25,1938.55,2739.46,SUP-008
+SKU-020,Basmati Rice 25kg,Dhauli Basket,Rice & Grains,KG,25,2086.95,2645.13,SUP-001
+SKU-021,Basmati Rice 25kg,Dhauli Basket,Rice & Grains,KG,25,2161.39,3037.47,SUP-002
+SKU-022,Poha Chuda 25kg,Mahanadi Pantry,Rice & Grains,KG,25,1016.24,1281.21,SUP-001
+SKU-023,Poha Chuda 25kg,Mahanadi Pantry,Rice & Grains,KG,25,1104.75,1346.83,SUP-002
+SKU-024,Poha Chuda 25kg,Mahanadi Pantry,Rice & Grains,KG,25,959.97,1134.74,SUP-003
+SKU-025,Toor Dal 30kg,Kalinga Harvest,Pulses & Dal,KG,30,2590.26,3538.71,SUP-002
+SKU-026,Toor Dal 30kg,Kalinga Harvest,Pulses & Dal,KG,30,2534.33,3544.52,SUP-003
+SKU-027,Toor Dal 30kg,Kalinga Harvest,Pulses & Dal,KG,30,2365.9,3168.53,SUP-004
+SKU-028,Moong Dal 30kg,Konark Choice,Pulses & Dal,KG,30,2034.59,2466.06,SUP-003
+SKU-029,Moong Dal 30kg,Konark Choice,Pulses & Dal,KG,30,2377.13,3118.57,SUP-004
+SKU-030,Moong Dal 30kg,Konark Choice,Pulses & Dal,KG,30,2310.27,3220.98,SUP-005
+SKU-031,Chana Dal 30kg,Utkal Daily,Pulses & Dal,KG,30,1788.28,2387.36,SUP-004
+SKU-032,Chana Dal 30kg,Utkal Daily,Pulses & Dal,KG,30,1751.13,2215.37,SUP-005
+SKU-033,Chana Dal 30kg,Utkal Daily,Pulses & Dal,KG,30,1491.16,1941.91,SUP-006
+SKU-034,Besan 25kg,Bhuban Fresh,Pulses & Dal,KG,25,1427.28,1847.45,SUP-005
+SKU-035,Besan 25kg,Bhuban Fresh,Pulses & Dal,KG,25,1710.91,2130.94,SUP-006
+SKU-036,Besan 25kg,Bhuban Fresh,Pulses & Dal,KG,25,1357.89,1709.29,SUP-007
+SKU-037,Sunflower Oil 1ltr x 16,Dhauli Basket,Cooking Oil,TIN,16,1699.49,2320.38,SUP-006
+SKU-038,Sunflower Oil 1ltr x 16,Dhauli Basket,Cooking Oil,TIN,16,1835.43,2568.67,SUP-007
+SKU-039,Sunflower Oil 1ltr x 16,Dhauli Basket,Cooking Oil,TIN,16,1890.79,2446.28,SUP-008
+SKU-040,Mustard Oil 1ltr x 16,Mahanadi Pantry,Cooking Oil,TIN,16,2151.11,2638.88,SUP-007
+SKU-041,Mustard Oil 1ltr x 16,Mahanadi Pantry,Cooking Oil,TIN,16,1704.81,2054.66,SUP-008
+SKU-042,Mustard Oil 1ltr x 16,Mahanadi Pantry,Cooking Oil,TIN,16,2099.41,2748.81,SUP-001
+SKU-043,Groundnut Oil 1ltr x 12,Kalinga Harvest,Cooking Oil,TIN,12,1555.35,2053.52,SUP-008
+SKU-044,Groundnut Oil 1ltr x 12,Kalinga Harvest,Cooking Oil,TIN,12,1550.94,2132.5,SUP-001
+SKU-045,Groundnut Oil 1ltr x 12,Kalinga Harvest,Cooking Oil,TIN,12,1695.51,2181.59,SUP-002
+SKU-046,Refined Sugar 50kg,Konark Choice,Sugar & Sweeteners,KG,50,1624.34,2203.38,SUP-001
+SKU-047,Refined Sugar 50kg,Konark Choice,Sugar & Sweeteners,KG,50,1654.01,1992.32,SUP-002
+SKU-048,Refined Sugar 50kg,Konark Choice,Sugar & Sweeteners,KG,50,1534.06,2223.36,SUP-003
+SKU-049,Jaggery Gur 30kg,Utkal Daily,Sugar & Sweeteners,KG,30,1641.6,2258.71,SUP-002
+SKU-050,Jaggery Gur 30kg,Utkal Daily,Sugar & Sweeteners,KG,30,1371.67,1990.8,SUP-003
+SKU-051,Jaggery Gur 30kg,Utkal Daily,Sugar & Sweeteners,KG,30,1587.08,2191.33,SUP-004
+SKU-052,Iodised Salt 1kg x 25pc,Bhuban Fresh,Salt & Seasoning,PKT,25,248.35,311.98,SUP-003
+SKU-053,Iodised Salt 1kg x 25pc,Bhuban Fresh,Salt & Seasoning,PKT,25,222.94,319.41,SUP-004
+SKU-054,Iodised Salt 1kg x 25pc,Bhuban Fresh,Salt & Seasoning,PKT,25,248.82,307.71,SUP-005
+SKU-055,Turmeric Powder 1kg x 10pc,Dhauli Basket,Salt & Seasoning,PKT,10,753.76,1011.68,SUP-004
+SKU-056,Turmeric Powder 1kg x 10pc,Dhauli Basket,Salt & Seasoning,PKT,10,724.3,1028.4,SUP-005
+SKU-057,Turmeric Powder 1kg x 10pc,Dhauli Basket,Salt & Seasoning,PKT,10,856.94,1183.82,SUP-006
+SKU-058,Cumin Whole 5kg,Mahanadi Pantry,Salt & Seasoning,KG,5,1565.03,2121.63,SUP-005
+SKU-059,Cumin Whole 5kg,Mahanadi Pantry,Salt & Seasoning,KG,5,1634.35,2225.91,SUP-006
+SKU-060,Cumin Whole 5kg,Mahanadi Pantry,Salt & Seasoning,KG,5,1406.51,1823.44,SUP-007

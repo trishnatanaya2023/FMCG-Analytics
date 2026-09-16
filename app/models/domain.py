@@ -36,6 +36,7 @@ class Supplier(Base):
     minimum_order_quantity: Mapped[int] = mapped_column(Integer, default=1)
     contact_email: Mapped[str | None] = mapped_column(String(200))
     products: Mapped[list["Product"]] = relationship(back_populates="supplier")
+    purchases: Mapped[list["Purchase"]] = relationship(back_populates="supplier")
 
 
 class Product(Base):
@@ -48,11 +49,36 @@ class Product(Base):
     supplier_id: Mapped[int] = mapped_column(ForeignKey("suppliers.id"), index=True)
     purchase_price: Mapped[Decimal] = mapped_column(Numeric(12, 2))
     selling_price: Mapped[Decimal] = mapped_column(Numeric(12, 2))
-    shelf_life_days: Mapped[int] = mapped_column(Integer, default=180)
     active: Mapped[bool] = mapped_column(Boolean, default=True)
     category: Mapped[Category] = relationship(back_populates="products")
     brand: Mapped[Brand] = relationship(back_populates="products")
     supplier: Mapped[Supplier] = relationship(back_populates="products")
+    purchase_items: Mapped[list["PurchaseItem"]] = relationship(back_populates="product")
+
+
+class Purchase(Base):
+    __tablename__ = "purchases"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    purchase_id: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    date: Mapped[date] = mapped_column(Date, index=True)
+    supplier_id: Mapped[int] = mapped_column(ForeignKey("suppliers.id"), index=True)
+    invoice_reference: Mapped[str] = mapped_column(String(80), unique=True, index=True)
+    total_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2))
+    supplier: Mapped[Supplier] = relationship(back_populates="purchases")
+    items: Mapped[list["PurchaseItem"]] = relationship(back_populates="purchase", cascade="all, delete-orphan")
+
+
+class PurchaseItem(Base):
+    __tablename__ = "purchase_items"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    purchase_item_id: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    purchase_id: Mapped[int] = mapped_column(ForeignKey("purchases.id"), index=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), index=True)
+    quantity: Mapped[int] = mapped_column(Integer)
+    unit_cost: Mapped[Decimal] = mapped_column(Numeric(12, 2))
+    amount: Mapped[Decimal] = mapped_column(Numeric(12, 2))
+    purchase: Mapped[Purchase] = relationship(back_populates="items")
+    product: Mapped[Product] = relationship(back_populates="purchase_items")
 
 
 class Retailer(Base):
@@ -69,23 +95,52 @@ class Sale(Base):
     __tablename__ = "sales"
     id: Mapped[int] = mapped_column(primary_key=True)
     sale_date: Mapped[date] = mapped_column(Date, index=True)
+    due_date: Mapped[date | None] = mapped_column(Date, nullable=True, index=True)
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), index=True)
-    retailer_id: Mapped[int] = mapped_column(ForeignKey("retailers.id"), index=True)
+    retailer_id: Mapped[int | None] = mapped_column(ForeignKey("retailers.id"), nullable=True, index=True)
     quantity: Mapped[int] = mapped_column(Integer)
     selling_price: Mapped[Decimal] = mapped_column(Numeric(12, 2))
     purchase_cost: Mapped[Decimal] = mapped_column(Numeric(12, 2))
     __table_args__ = (Index("ix_sales_date_product", "sale_date", "product_id"),)
 
 
-class InventoryBatch(Base):
-    __tablename__ = "inventory_batches"
+class InventoryStock(Base):
+    __tablename__ = "inventory_stock"
     id: Mapped[int] = mapped_column(primary_key=True)
-    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), index=True)
-    batch_id: Mapped[str] = mapped_column(String(80), unique=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), unique=True, index=True)
     quantity: Mapped[int] = mapped_column(Integer)
     reserved_quantity: Mapped[int] = mapped_column(Integer, default=0)
-    manufacturing_date: Mapped[date] = mapped_column(Date)
-    expiry_date: Mapped[date] = mapped_column(Date, index=True)
+
+
+class Expense(Base):
+    __tablename__ = "expenses"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    expense_id: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    date: Mapped[date] = mapped_column(Date, index=True)
+    category: Mapped[str] = mapped_column(String(80), index=True)
+    description: Mapped[str] = mapped_column(String(250))
+    amount: Mapped[Decimal] = mapped_column(Numeric(12, 2))
+    payment_method: Mapped[str] = mapped_column(String(40), default="Bank Transfer")
+
+
+class SupplierPayment(Base):
+    __tablename__ = "supplier_payments"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    payment_id: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    date: Mapped[date] = mapped_column(Date, index=True)
+    supplier_id: Mapped[int] = mapped_column(ForeignKey("suppliers.id"), index=True)
+    amount: Mapped[Decimal] = mapped_column(Numeric(12, 2))
+    payment_method: Mapped[str] = mapped_column(String(40))
+
+
+class RetailerPayment(Base):
+    __tablename__ = "retailer_payments"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    payment_id: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    date: Mapped[date] = mapped_column(Date, index=True)
+    retailer_id: Mapped[int] = mapped_column(ForeignKey("retailers.id"), index=True)
+    amount: Mapped[Decimal] = mapped_column(Numeric(12, 2))
+    payment_method: Mapped[str] = mapped_column(String(40))
 
 
 class Forecast(Base):

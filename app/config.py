@@ -12,9 +12,10 @@ class Settings(BaseSettings):
     safety_stock_days: float = 3
     stockout_warning_days: int = 14
     slow_moving_days: int = 30
-    expiry_monitor_days: int = 90
-    expiry_warning_days: int = 60
-    expiry_critical_days: int = 30
+    supplier_balance_critical_ratio: float = 2.0
+    retailer_due_soon_days: int = 7
+    retailer_high_risk_overdue_days: int = 30
+    retailer_high_risk_credit_ratio: float = 1.0
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", case_sensitive=False)
 
 

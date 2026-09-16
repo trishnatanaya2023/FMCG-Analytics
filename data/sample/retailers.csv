@@ -1,101 +1,61 @@
-retailer_id,name,location,credit_limit,payment_terms
-RET-001,Retailer 001,North,298093,30
-RET-002,Retailer 002,West,87884,15
-RET-003,Retailer 003,North,272919,30
-RET-004,Retailer 004,North,72732,45
-RET-005,Retailer 005,East,237152,15
-RET-006,Retailer 006,West,261410,45
-RET-007,Retailer 007,North,272698,15
-RET-008,Retailer 008,South,105854,45
-RET-009,Retailer 009,Central,273361,30
-RET-010,Retailer 010,Central,78995,15
-RET-011,Retailer 011,East,179714,45
-RET-012,Retailer 012,East,167386,15
-RET-013,Retailer 013,South,128982,30
-RET-014,Retailer 014,West,55528,15
-RET-015,Retailer 015,East,243003,45
-RET-016,Retailer 016,South,133895,45
-RET-017,Retailer 017,North,215415,45
-RET-018,Retailer 018,North,152554,30
-RET-019,Retailer 019,Central,143414,30
-RET-020,Retailer 020,East,271573,30
-RET-021,Retailer 021,East,73616,45
-RET-022,Retailer 022,East,234154,45
-RET-023,Retailer 023,West,236697,15
-RET-024,Retailer 024,North,144997,30
-RET-025,Retailer 025,North,115615,15
-RET-026,Retailer 026,South,51326,15
-RET-027,Retailer 027,East,284203,45
-RET-028,Retailer 028,West,286932,15
-RET-029,Retailer 029,East,110242,45
-RET-030,Retailer 030,East,57977,30
-RET-031,Retailer 031,Central,80689,15
-RET-032,Retailer 032,North,66910,30
-RET-033,Retailer 033,East,257778,30
-RET-034,Retailer 034,East,272977,45
-RET-035,Retailer 035,East,88321,30
-RET-036,Retailer 036,Central,236684,45
-RET-037,Retailer 037,South,94817,45
-RET-038,Retailer 038,Central,141802,45
-RET-039,Retailer 039,South,199845,30
-RET-040,Retailer 040,East,229981,15
-RET-041,Retailer 041,East,268640,30
-RET-042,Retailer 042,Central,61196,15
-RET-043,Retailer 043,East,99108,30
-RET-044,Retailer 044,South,120127,45
-RET-045,Retailer 045,North,127580,30
-RET-046,Retailer 046,South,299506,15
-RET-047,Retailer 047,Central,244351,30
-RET-048,Retailer 048,North,130104,45
-RET-049,Retailer 049,Central,292956,45
-RET-050,Retailer 050,East,174826,15
-RET-051,Retailer 051,North,175185,30
-RET-052,Retailer 052,South,158424,30
-RET-053,Retailer 053,East,85974,15
-RET-054,Retailer 054,South,283593,15
-RET-055,Retailer 055,North,53484,15
-RET-056,Retailer 056,West,93569,45
-RET-057,Retailer 057,West,107414,45
-RET-058,Retailer 058,North,119824,45
-RET-059,Retailer 059,South,82955,45
-RET-060,Retailer 060,South,54490,45
-RET-061,Retailer 061,West,219414,15
-RET-062,Retailer 062,West,292327,45
-RET-063,Retailer 063,West,80458,15
-RET-064,Retailer 064,Central,124133,30
-RET-065,Retailer 065,West,176582,30
-RET-066,Retailer 066,South,281875,30
-RET-067,Retailer 067,North,223565,15
-RET-068,Retailer 068,West,241547,15
-RET-069,Retailer 069,Central,195279,45
-RET-070,Retailer 070,Central,154258,15
-RET-071,Retailer 071,South,99943,15
-RET-072,Retailer 072,South,266078,45
-RET-073,Retailer 073,North,251031,15
-RET-074,Retailer 074,North,56275,45
-RET-075,Retailer 075,East,228851,45
-RET-076,Retailer 076,East,71097,30
-RET-077,Retailer 077,South,234746,15
-RET-078,Retailer 078,South,256488,15
-RET-079,Retailer 079,Central,82764,15
-RET-080,Retailer 080,East,158458,30
-RET-081,Retailer 081,Central,80938,15
-RET-082,Retailer 082,Central,191820,30
-RET-083,Retailer 083,South,281890,15
-RET-084,Retailer 084,South,70217,30
-RET-085,Retailer 085,Central,149394,15
-RET-086,Retailer 086,West,293280,45
-RET-087,Retailer 087,South,125237,15
-RET-088,Retailer 088,West,83054,15
-RET-089,Retailer 089,East,172146,15
-RET-090,Retailer 090,Central,177093,45
-RET-091,Retailer 091,South,215716,15
-RET-092,Retailer 092,Central,128434,30
-RET-093,Retailer 093,Central,288905,30
-RET-094,Retailer 094,North,180255,30
-RET-095,Retailer 095,North,121611,45
-RET-096,Retailer 096,East,290071,45
-RET-097,Retailer 097,North,281202,30
-RET-098,Retailer 098,South,174791,45
-RET-099,Retailer 099,East,56214,15
-RET-100,Retailer 100,Central,199234,45
+retailer_id,name,location,credit_limit,payment_terms_days
+RET-001,Sanjay Behera Store,Nayapalli,15989196.12,15
+RET-002,Mamata Sahoo Grocery,Saheed Nagar,14866766.64,60
+RET-003,Bikash Mohanty Store,Mancheswar,20355589.38,30
+RET-004,Lipsa Pradhan Grocery,Rasulgarh,15971581.8,45
+RET-005,Rakesh Jena Store,Mancheswar,19273458.75,30
+RET-006,Prativa Rout Grocery,Kharavel Nagar,17486887.23,30
+RET-007,Soumya Das Store,Old Town,18682514.88,60
+RET-008,Tapan Nayak Grocery,Unit 4,17019741.63,15
+RET-009,Niharika Swain Store,Baramunda,2412832.72,45
+RET-010,Manoj Barik Grocery,Unit 4,17615868.54,45
+RET-011,Sasmita Behera Store,Mancheswar,18841221.0,30
+RET-012,Ranjan Sahoo Grocery,Old Town,16958382.18,30
+RET-013,Jyoti Mohanty Store,Nayapalli,14936807.46,60
+RET-014,Akash Pradhan Grocery,Mancheswar,17466192.24,60
+RET-015,Madhuri Jena Store,Kharavel Nagar,18506933.1,60
+RET-016,Debendra Rout Grocery,Bapuji Nagar,16323852.45,15
+RET-017,Kavita Nayak Store,Bapuji Nagar,878253.27,15
+RET-018,Prakash Das Grocery,Jharapada,2437856.06,15
+RET-019,Sushant Swain Store,Rasulgarh,15760883.37,15
+RET-020,Anita Barik Grocery,Patia,14938658.52,60
+RET-021,Biswa Behera Store,Old Town,16455330.78,60
+RET-022,Gitanjali Sahoo Grocery,Old Town,17933141.43,30
+RET-023,Kunal Mohanty Store,Kharavel Nagar,18564663.42,45
+RET-024,Mitali Pradhan Grocery,Saheed Nagar,16183187.4,15
+RET-025,Saheed Nagar VT Store,Unit 4,18162878.31,30
+RET-026,Saheed Nagar Grocery,Bapuji Nagar,18760062.96,60
+RET-027,Saheed Nagar Daily Needs,Rasulgarh,2388852.12,45
+RET-028,Unit 4 VT Store,Rasulgarh,16226081.04,60
+RET-029,Unit 4 Grocery,Rasulgarh,17693607.87,15
+RET-030,Unit 4 Daily Needs,Nayapalli,18491501.91,15
+RET-031,Mancheswar VT Store,Saheed Nagar,17732903.79,30
+RET-032,Mancheswar Grocery,Saheed Nagar,16744699.59,30
+RET-033,Mancheswar Daily Needs,Kharavel Nagar,18703029.57,30
+RET-034,Kharavel Nagar VT Store,Rasulgarh,984971.35,60
+RET-035,Kharavel Nagar Grocery,Baramunda,16269103.5,30
+RET-036,Kharavel Nagar Daily Needs,Rasulgarh,2692844.67,60
+RET-037,Patia VT Store,Rasulgarh,16465713.51,30
+RET-038,Patia Grocery,Bapuji Nagar,17124860.28,45
+RET-039,Patia Daily Needs,Unit 4,17086646.64,60
+RET-040,Rasulgarh VT Store,Jharapada,18238162.26,15
+RET-041,Rasulgarh Grocery,Jharapada,17463577.08,60
+RET-042,Rasulgarh Daily Needs,Rasulgarh,17207462.52,15
+RET-043,Jharapada VT Store,Nayapalli,18957666.42,15
+RET-044,Jharapada Grocery,Kharavel Nagar,16353851.85,30
+RET-045,Jharapada Daily Needs,Bapuji Nagar,2602056.39,30
+RET-046,Old Town VT Store,Kharavel Nagar,17676579.36,15
+RET-047,Old Town Grocery,Jharapada,20124929.07,15
+RET-048,Old Town Daily Needs,Jharapada,18714291.39,45
+RET-049,Baramunda VT Store,Chandrasekharpur,17363739.81,60
+RET-050,Baramunda Grocery,Rasulgarh,16226108.25,15
+RET-051,Baramunda Daily Needs,Kharavel Nagar,876830.19,30
+RET-052,Nayapalli VT Store,Saheed Nagar,17806529.28,60
+RET-053,Nayapalli Grocery,Patia,18474393.48,60
+RET-054,Nayapalli Daily Needs,Nayapalli,2290651.94,45
+RET-055,Chandrasekharpur VT Store,Saheed Nagar,17078205.93,30
+RET-056,Chandrasekharpur Grocery,Chandrasekharpur,17176295.4,45
+RET-057,Chandrasekharpur Daily Needs,Jharapada,19900328.19,30
+RET-058,Bapuji Nagar VT Store,Unit 4,16370274.63,15
+RET-059,Bapuji Nagar Grocery,Kharavel Nagar,18557748.48,60
+RET-060,Bapuji Nagar Daily Needs,Jharapada,19576913.97,60

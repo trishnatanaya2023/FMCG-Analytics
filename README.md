@@ -10,14 +10,14 @@ The project is intentionally explainable. Forecasts expose their selected baseli
 
 ## What is included
 
-- A reproducible sample dataset with 50 products, 10 categories, 5 brands, 5 suppliers, 100 retailers, 365 days of sales, and batch-level inventory.
-- Streamlit workspaces for executive metrics, sales, demand forecasting, inventory, reorder planning, expiry management, retailer analytics, supplier analytics, and alerts. The Executive Dashboard presents its eight KPIs in a responsive two-column grid.
+- A reproducible sample dataset with 60 staple-grocery products across 6 focused categories, 6 brands, 8 suppliers, 60 retailers, 365 days of sales, and current-stock inventory.
+- Streamlit workspaces for executive metrics, sales, demand forecasting, inventory, reorder planning, retailer analytics, supplier analytics, and alerts. The Executive Dashboard presents its seven KPIs in a responsive two-column grid.
 - A FastAPI service with JWT authentication, product/sales/inventory reads, demand forecasts, reorder recommendation generation, recommendation decisions, and CSV upload validation. Product and sales responses retain numeric money fields and add Indian Rupee formatted fields for display clients.
-- SQLAlchemy models for users, products, suppliers, retailers, sales, inventory batches, forecasts, reorder recommendations, and alerts.
+- SQLAlchemy models for users, products, suppliers, retailers, sales, current inventory stock, forecasts, reorder recommendations, and alerts.
 - CSV ingestion for suppliers, products, retailers, inventory, and sales. Uploads are validated before processing and are rolled back if a row cannot be ingested.
 - SQLite as the default local database and PostgreSQL support through `psycopg2`.
 - A shared Indian Rupee formatter for dashboard KPIs, tables, chart labels, and API display fields.
-- Pytest coverage for forecasting preparation and metrics, inventory and expiry calculations, analytics aggregations, currency formatting, validation, authentication, and ingestion behavior.
+- Pytest coverage for forecasting preparation and metrics, current-stock inventory calculations, analytics aggregations, currency formatting, validation, authentication, and ingestion behavior.
 
 ## Architecture
 
@@ -100,7 +100,7 @@ The result includes a risk level, estimated stockout date, recommended quantity,
 
 ### Currency display
 
-All user-facing currency is displayed as Indian Rupees using lakh/crore grouping through `app/services/formatting.py`. Examples include `₹1,23,456` and `₹1,00,00,000`. The formatter is used by dashboard KPI cards, revenue charts, profitability/expiry/retailer tables, and formatted API fields. Raw numeric API money fields remain available for calculations and backward compatibility.
+All user-facing currency is displayed as Indian Rupees using lakh/crore grouping through `app/services/formatting.py`. Examples include `₹1,23,456` and `₹1,00,00,000`. The formatter is used by dashboard KPI cards, revenue charts, profitability/retailer tables, and formatted API fields. Raw numeric API money fields remain available for calculations and backward compatibility.
 
 ## Project layout
 
@@ -211,9 +211,6 @@ Settings are loaded by `pydantic-settings` from environment variables and an opt
 | `SAFETY_STOCK_DAYS` | `3` | Safety-stock demand buffer. |
 | `STOCKOUT_WARNING_DAYS` | `14` | Stockout warning threshold. |
 | `SLOW_MOVING_DAYS` | `30` | Slow-moving inventory threshold. |
-| `EXPIRY_MONITOR_DAYS` | `90` | Expiry monitoring threshold. |
-| `EXPIRY_WARNING_DAYS` | `60` | Expiry warning threshold. |
-| `EXPIRY_CRITICAL_DAYS` | `30` | Critical expiry threshold. |
 
 Keep `.env`, database files, and secrets out of source control. Passwords are stored as PBKDF2-SHA256 hashes; plaintext passwords are not persisted.
 
@@ -253,8 +250,8 @@ CSV headers are validated before ingestion. Required columns are:
 | Dataset | Required columns |
 | --- | --- |
 | `sales` | `date`, `product_id`, `retailer_id`, `quantity`, `selling_price` |
-| `products` | `product_id`, `name`, `brand`, `category`, `purchase_price`, `selling_price`, `shelf_life`, `supplier_id` |
-| `inventory` | `product_id`, `batch_id`, `quantity`, `manufacturing_date`, `expiry_date` |
+| `products` | `product_id`, `name`, `brand`, `category`, `purchase_price`, `selling_price`, `supplier_id` |
+| `inventory` | `product_id`, `quantity`, `reserved_quantity` |
 | `retailers` | `retailer_id`, `name`, `location`, `credit_limit`, `payment_terms` |
 | `suppliers` | `supplier_id`, `name`, `lead_time`, `minimum_order_quantity` |
 
@@ -270,7 +267,7 @@ Install the requirements, then run:
 python -m pytest -q
 ```
 
-The suite covers inventory formulas and stockout behavior, configured expiry thresholds, forecast preparation and metrics, profitability and analytics aggregations, Indian currency formatting, CSV validation, transactional ingestion, JWT login, authenticated API access, and recommendation lifecycle behavior. The current suite contains 26 tests.
+The suite covers current-stock inventory formulas and stockout behavior, forecast preparation and metrics, profitability and analytics aggregations, Indian currency formatting, CSV validation, transactional ingestion, JWT login, authenticated API access, and recommendation lifecycle behavior.
 
 ## Current MVP boundaries
 

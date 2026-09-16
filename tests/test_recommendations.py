@@ -6,7 +6,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.api.main import app
 from app.database.session import Base, get_db
-from app.models.domain import Brand, Category, InventoryBatch, Product, Retailer, Sale, Supplier
+from app.models.domain import Brand, Category, InventoryStock, Product, Retailer, Sale, Supplier
 from app.services.auth import get_current_user
 
 
@@ -32,12 +32,11 @@ def test_recommendation_lifecycle_is_persisted():
         retailer = Retailer(retailer_id="RET-1", name="Retailer", location="North")
         db.add_all([category, brand, supplier, retailer])
         db.flush()
-        product = Product(product_id="SKU-1", name="Biscuit A", category=category, brand=brand, supplier=supplier,
-                          purchase_price=10, selling_price=15, shelf_life_days=180)
+        product = Product(product_id="SKU-1", name="Rice A", category=category, brand=brand, supplier=supplier,
+                  purchase_price=10, selling_price=15)
         db.add(product)
         db.flush()
-        db.add(InventoryBatch(product_id=product.id, batch_id="BATCH-1", quantity=10,
-                              manufacturing_date=date(2026, 1, 1), expiry_date=date(2026, 12, 31)))
+        db.add(InventoryStock(product_id=product.id, quantity=10, reserved_quantity=0))
         db.add(Sale(sale_date=date.today() - timedelta(days=10), product_id=product.id, retailer_id=retailer.id,
                     quantity=20, selling_price=15, purchase_cost=10))
         db.commit()

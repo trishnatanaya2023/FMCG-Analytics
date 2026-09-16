@@ -1,6 +1,9 @@
 supplier_id,name,lead_time,minimum_order_quantity
-SUP-001,SunVale Distribution,4,12
-SUP-002,FreshField Distribution,12,24
-SUP-003,DailyDrop Distribution,10,10
-SUP-004,HarvestCo Distribution,8,20
-SUP-005,GoodBasket Distribution,8,6
+SUP-001,Madhab Behera Agro Foods,4,12
+SUP-002,Pranati Mohanty Trading Co.,13,18
+SUP-003,Subhranshu Sahoo Enterprises,11,10
+SUP-004,Suchitra Pradhan Food Products,8,24
+SUP-005,Debasish Rout Distributors,8,15
+SUP-006,Manaswini Jena Wholesale,14,20
+SUP-007,Chandan Nayak Agro Mart,4,9
+SUP-008,Rasmita Das Supply House,12,14

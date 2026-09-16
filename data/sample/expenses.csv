@@ -1,0 +1,73 @@
+expense_id,date,category,description,amount,payment_method
+EXP-2024-04-01,2024-04-01,Rent,Monthly warehousing and office occupancy,115000.0,Bank Transfer
+EXP-2024-04-02,2024-04-04,Vehicle Maintenance,Fleet servicing and tyre replacement,15426.0,Bank Transfer
+EXP-2024-04-03,2024-04-28,Labour,Wages and dispatch helper support,75740.0,Bank Transfer
+EXP-2024-04-04,2024-04-03,Fuel,Delivery and field movement expense,19156.0,Cash
+EXP-2024-04-05,2024-04-29,Utilities,"Power, water, and telecom",14169.0,UPI
+EXP-2024-04-06,2024-04-04,Freight,Third-party transport and handling,30350.0,Bank Transfer
+EXP-2024-05-01,2024-05-31,Rent,Monthly warehousing and office occupancy,115000.0,Bank Transfer
+EXP-2024-05-02,2024-05-10,Vehicle Maintenance,Fleet servicing and tyre replacement,28794.0,Bank Transfer
+EXP-2024-05-03,2024-05-29,Labour,Wages and dispatch helper support,84266.0,Bank Transfer
+EXP-2024-05-04,2024-05-08,Fuel,Delivery and field movement expense,20675.0,Cash
+EXP-2024-05-05,2024-05-30,Utilities,"Power, water, and telecom",13207.0,UPI
+EXP-2024-05-06,2024-05-07,Freight,Third-party transport and handling,30995.0,Bank Transfer
+EXP-2024-06-01,2024-06-30,Rent,Monthly warehousing and office occupancy,115000.0,Bank Transfer
+EXP-2024-06-02,2024-06-14,Vehicle Maintenance,Fleet servicing and tyre replacement,22122.0,Bank Transfer
+EXP-2024-06-03,2024-06-28,Labour,Wages and dispatch helper support,85456.0,Bank Transfer
+EXP-2024-06-04,2024-06-14,Fuel,Delivery and field movement expense,16105.0,Cash
+EXP-2024-06-05,2024-06-29,Utilities,"Power, water, and telecom",14874.0,UPI
+EXP-2024-06-06,2024-06-13,Freight,Third-party transport and handling,45363.0,Bank Transfer
+EXP-2024-07-01,2024-07-31,Rent,Monthly warehousing and office occupancy,115000.0,Bank Transfer
+EXP-2024-07-02,2024-07-19,Vehicle Maintenance,Fleet servicing and tyre replacement,19776.0,Bank Transfer
+EXP-2024-07-03,2024-07-29,Labour,Wages and dispatch helper support,79342.0,Bank Transfer
+EXP-2024-07-04,2024-07-14,Fuel,Delivery and field movement expense,21053.0,Cash
+EXP-2024-07-05,2024-07-30,Utilities,"Power, water, and telecom",15455.0,UPI
+EXP-2024-07-06,2024-07-13,Freight,Third-party transport and handling,24006.0,Bank Transfer
+EXP-2024-08-01,2024-08-31,Rent,Monthly warehousing and office occupancy,115000.0,Bank Transfer
+EXP-2024-08-02,2024-08-18,Vehicle Maintenance,Fleet servicing and tyre replacement,17602.0,Bank Transfer
+EXP-2024-08-03,2024-08-29,Labour,Wages and dispatch helper support,78193.0,Bank Transfer
+EXP-2024-08-04,2024-08-05,Fuel,Delivery and field movement expense,20282.0,Cash
+EXP-2024-08-05,2024-08-30,Utilities,"Power, water, and telecom",12276.0,UPI
+EXP-2024-08-06,2024-08-08,Freight,Third-party transport and handling,16756.0,Bank Transfer
+EXP-2024-09-01,2024-09-30,Rent,Monthly warehousing and office occupancy,115000.0,Bank Transfer
+EXP-2024-09-02,2024-09-17,Vehicle Maintenance,Fleet servicing and tyre replacement,36845.0,Bank Transfer
+EXP-2024-09-03,2024-09-28,Labour,Wages and dispatch helper support,85241.0,Bank Transfer
+EXP-2024-09-04,2024-09-06,Fuel,Delivery and field movement expense,15810.0,Cash
+EXP-2024-09-05,2024-09-29,Utilities,"Power, water, and telecom",18692.0,UPI
+EXP-2024-09-06,2024-09-02,Freight,Third-party transport and handling,35412.0,Bank Transfer
+EXP-2024-10-01,2024-10-31,Rent,Monthly warehousing and office occupancy,115000.0,Bank Transfer
+EXP-2024-10-02,2024-10-08,Vehicle Maintenance,Fleet servicing and tyre replacement,22805.0,Bank Transfer
+EXP-2024-10-03,2024-10-29,Labour,Wages and dispatch helper support,74989.0,Bank Transfer
+EXP-2024-10-04,2024-10-07,Fuel,Delivery and field movement expense,22150.0,Cash
+EXP-2024-10-05,2024-10-30,Utilities,"Power, water, and telecom",17100.0,UPI
+EXP-2024-10-06,2024-10-15,Freight,Third-party transport and handling,30354.0,Bank Transfer
+EXP-2024-11-01,2024-11-30,Rent,Monthly warehousing and office occupancy,115000.0,Bank Transfer
+EXP-2024-11-02,2024-11-19,Vehicle Maintenance,Fleet servicing and tyre replacement,39949.0,Bank Transfer
+EXP-2024-11-03,2024-11-28,Labour,Wages and dispatch helper support,77907.0,Bank Transfer
+EXP-2024-11-04,2024-11-07,Fuel,Delivery and field movement expense,16969.0,Cash
+EXP-2024-11-05,2024-11-29,Utilities,"Power, water, and telecom",14034.0,UPI
+EXP-2024-11-06,2024-11-11,Freight,Third-party transport and handling,39484.0,Bank Transfer
+EXP-2024-12-01,2024-12-31,Rent,Monthly warehousing and office occupancy,115000.0,Bank Transfer
+EXP-2024-12-02,2024-12-03,Vehicle Maintenance,Fleet servicing and tyre replacement,41781.0,Bank Transfer
+EXP-2024-12-03,2024-12-29,Labour,Wages and dispatch helper support,83629.0,Bank Transfer
+EXP-2024-12-04,2024-12-05,Fuel,Delivery and field movement expense,20669.0,Cash
+EXP-2024-12-05,2024-12-30,Utilities,"Power, water, and telecom",16814.0,UPI
+EXP-2024-12-06,2024-12-13,Freight,Third-party transport and handling,37834.0,Bank Transfer
+EXP-2025-01-01,2025-01-31,Rent,Monthly warehousing and office occupancy,115000.0,Bank Transfer
+EXP-2025-01-02,2025-01-06,Vehicle Maintenance,Fleet servicing and tyre replacement,40970.0,Bank Transfer
+EXP-2025-01-03,2025-01-29,Labour,Wages and dispatch helper support,78481.0,Bank Transfer
+EXP-2025-01-04,2025-01-15,Fuel,Delivery and field movement expense,20664.0,Cash
+EXP-2025-01-05,2025-01-30,Utilities,"Power, water, and telecom",16663.0,UPI
+EXP-2025-01-06,2025-01-09,Freight,Third-party transport and handling,31959.0,Bank Transfer
+EXP-2025-02-01,2025-02-28,Rent,Monthly warehousing and office occupancy,115000.0,Bank Transfer
+EXP-2025-02-02,2025-02-07,Vehicle Maintenance,Fleet servicing and tyre replacement,37966.0,Bank Transfer
+EXP-2025-02-03,2025-02-26,Labour,Wages and dispatch helper support,88799.0,Bank Transfer
+EXP-2025-02-04,2025-02-13,Fuel,Delivery and field movement expense,15878.0,Cash
+EXP-2025-02-05,2025-02-27,Utilities,"Power, water, and telecom",14419.0,UPI
+EXP-2025-02-06,2025-02-14,Freight,Third-party transport and handling,32591.0,Bank Transfer
+EXP-2025-03-01,2025-03-31,Rent,Monthly warehousing and office occupancy,115000.0,Bank Transfer
+EXP-2025-03-02,2025-03-07,Vehicle Maintenance,Fleet servicing and tyre replacement,25394.0,Bank Transfer
+EXP-2025-03-03,2025-03-29,Labour,Wages and dispatch helper support,76451.0,Bank Transfer
+EXP-2025-03-04,2025-03-10,Fuel,Delivery and field movement expense,24030.0,Cash
+EXP-2025-03-05,2025-03-30,Utilities,"Power, water, and telecom",14615.0,UPI
+EXP-2025-03-06,2025-03-15,Freight,Third-party transport and handling,20976.0,Bank Transfer

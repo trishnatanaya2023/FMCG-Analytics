@@ -1,9 +1,14 @@
 from datetime import date
 import math
+import sys
+from pathlib import Path
+
 import pandas as pd
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import scripts.generate_sample_data as generator
 from app.services.analytics import (category_revenue, daily_sales_revenue, product_profitability,
-                                    retailer_summary)
+                                    retailer_summary, supplier_outstanding_balances)
 from app.services.data_loading import load_sample_data
 from app.services.suppliers import supplier_product_counts
 from app.services.forecasting import (build_product_demand_history, calculate_accuracy_metrics,
@@ -14,8 +19,6 @@ from app.services.inventory import (
     calculate_inventory_position,
     calculate_reorder_point,
     calculate_safety_stock,
-    expiry_analysis,
-    expiry_risk_count,
 )
 from app.services.validation import validate_csv
 from app.services.formatting import format_currency
@@ -108,24 +111,16 @@ def test_product_profitability_includes_zero_sales_product():
     assert result.loc["B", "gross_margin_pct"] == 0
 
 
-def test_inventory_and_expiry_service_uses_configured_thresholds():
-    inventory = pd.DataFrame([
-        {"product_id": "A", "quantity": 10, "expiry_date": "2026-02-01"},
-        {"product_id": "A", "quantity": 5, "expiry_date": "2026-04-01"},
-    ])
+def test_inventory_value_uses_current_stock():
+    inventory = pd.DataFrame([{"product_id": "A", "quantity": 10, "reserved_quantity": 0}])
     products = pd.DataFrame([{"product_id": "A", "name": "A", "purchase_price": 4}])
-    from app.config import Settings
-    settings = Settings(expiry_critical_days=20, expiry_warning_days=40, expiry_monitor_days=80)
-    view = expiry_analysis(inventory, products, date(2026, 1, 15), settings)
-    assert view.risk.astype(str).tolist() == ["Critical", "Monitor"]
-    assert expiry_risk_count(inventory, settings, date(2026, 1, 15)) == 1
-    assert calculate_inventory_value(inventory, products) == 60
+    assert calculate_inventory_value(inventory, products) == 40
 
 
 def test_analytics_aggregations():
     sales = pd.DataFrame([
         {"date": "2026-01-01", "category": "Biscuits", "retailer_id": "R1", "product_id": "A", "quantity": 2, "selling_price": 10},
-        {"date": "2026-01-01", "category": "Snacks", "retailer_id": "R1", "product_id": "B", "quantity": 3, "selling_price": 5},
+        {"date": "2026-01-01", "category": "Pulses & Dal", "retailer_id": "R1", "product_id": "B", "quantity": 3, "selling_price": 5},
         {"date": "2026-01-02", "category": "Biscuits", "retailer_id": "R2", "product_id": "A", "quantity": 1, "selling_price": 10},
     ])
     assert daily_sales_revenue(sales).to_dict("records") == [
@@ -145,11 +140,69 @@ def test_analytics_aggregations():
 def test_load_sample_data_joins_purchase_cost(tmp_path):
     pd.DataFrame([{"product_id": "P1", "purchase_price": 7, "name": "Product", "category": "C", "brand": "B", "supplier_id": "S1"}]).to_csv(tmp_path / "products.csv", index=False)
     pd.DataFrame([{"date": "2026-01-01", "product_id": "P1", "retailer_id": "R1", "quantity": 2, "selling_price": 10}]).to_csv(tmp_path / "sales.csv", index=False)
-    pd.DataFrame([{"product_id": "P1", "quantity": 4, "manufacturing_date": "2026-01-01", "expiry_date": "2026-02-01"}]).to_csv(tmp_path / "inventory.csv", index=False)
+    pd.DataFrame([{"product_id": "P1", "quantity": 4, "reserved_quantity": 0}]).to_csv(tmp_path / "inventory.csv", index=False)
     pd.DataFrame([{"retailer_id": "R1"}]).to_csv(tmp_path / "retailers.csv", index=False)
     pd.DataFrame([{"supplier_id": "S1"}]).to_csv(tmp_path / "suppliers.csv", index=False)
     _, sales, _, _, _ = load_sample_data(tmp_path)
     assert sales.loc[0, "purchase_cost"] == 7
+
+
+def test_supplier_outstanding_balance_uses_dated_purchase_reductions():
+    purchases = pd.DataFrame([
+        {"date": "2024-04-10", "supplier_id": "S1", "total_amount": 70},
+        {"date": "2024-05-10", "supplier_id": "S1", "total_amount": 35},
+    ])
+    payments = pd.DataFrame([
+        {"date": "2024-04-30", "supplier_id": "S1", "amount": 20},
+        {"date": "2024-06-01", "supplier_id": "S1", "amount": 10},
+    ])
+
+    result = supplier_outstanding_balances(purchases, payments, "2024-05-31").iloc[0]
+
+    assert result["purchases"] == 105
+    assert result["payments"] == 20
+    assert result["outstanding_balance"] == 85
+
+
+def test_sample_generator_uses_fy_2024_2025_and_counter_sales(tmp_path, monkeypatch):
+    monkeypatch.setattr(generator, "ROOT", tmp_path)
+    generator.generate()
+
+    products = pd.read_csv(tmp_path / "products.csv")
+    sales = pd.read_csv(tmp_path / "sales.csv")
+
+    assert {"pack_size", "units_per_pack"}.issubset(products.columns)
+    assert sales["date"].min() == "2024-04-01"
+    assert sales["date"].max() == "2025-03-31"
+    assert set(sales["sale_channel"].dropna().unique()) <= {"Retailer", "Counter"}
+    assert (sales["retailer_id"].isna() | sales["retailer_id"].astype(str).str.strip().eq("")).sum() > 0
+
+
+def test_sample_generator_creates_expense_dataset(tmp_path, monkeypatch):
+    monkeypatch.setattr(generator, "ROOT", tmp_path)
+    generator.generate()
+
+    expenses = pd.read_csv(tmp_path / "expenses.csv")
+
+    assert {"expense_id", "date", "category", "description", "amount", "payment_method"}.issubset(expenses.columns)
+    assert expenses["date"].min() == "2024-04-01"
+    assert expenses["date"].max() == "2025-03-31"
+    assert (expenses["category"] == "Rent").sum() >= 12
+    assert expenses["amount"].gt(0).all()
+    assert expenses["payment_method"].notna().all()
+
+
+def test_sample_generator_creates_supplier_payments(tmp_path, monkeypatch):
+    monkeypatch.setattr(generator, "ROOT", tmp_path)
+    generator.generate()
+
+    payments = pd.read_csv(tmp_path / "supplier_payments.csv")
+
+    assert {"payment_id", "date", "supplier_id", "amount", "payment_method"}.issubset(payments.columns)
+    assert payments["date"].min() >= "2024-04-01"
+    assert payments["date"].max() <= "2025-03-31"
+    assert payments["amount"].gt(0).all()
+    assert payments["supplier_id"].nunique() >= 6
 
 
 def valid_sales_frame():
