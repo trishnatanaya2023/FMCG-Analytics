@@ -78,7 +78,7 @@ if "access_token" not in st.session_state:
                 st.error(str(exc))
     st.stop()
 
-ROOT = Path(__file__).resolve().parents[2] / "data" / "sample"
+ROOT = Path(__file__).resolve().parents[2] / "data"
 
 @st.cache_data
 def load_data():

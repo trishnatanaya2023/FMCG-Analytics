@@ -13,7 +13,7 @@ from app.services.recommendations import generate_recommendations, list_recommen
 from app.services.validation import validate_csv
 
 app = FastAPI(title="DistribuSense API", version="0.1.0")
-ROOT = Path(__file__).resolve().parents[2] / "data" / "sample"
+ROOT = Path(__file__).resolve().parents[2] / "data"
 
 
 class RecommendationAction(BaseModel):

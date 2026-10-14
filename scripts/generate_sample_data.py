@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 SEED = 42
-ROOT = Path(__file__).resolve().parents[1] / "data" / "sample"
+ROOT = Path(__file__).resolve().parents[1] / "data"
 FY_START = pd.Timestamp("2024-04-01").normalize()
 FY_END = pd.Timestamp("2025-03-31").normalize()
 COUNTER_SALES_SHARE = 0.25
