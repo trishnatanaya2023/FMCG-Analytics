@@ -1,3 +1,4 @@
+from datetime import date
 import sys
 from html import escape
 from pathlib import Path
@@ -17,7 +18,7 @@ from app.services.accounting import (expense_category_summary, filter_expenses, 
 from app.services.data_loading import load_sample_data
 from app.services.forecasting import (build_product_demand_history, forecast_daily,
                                       get_product_ids, get_forecast_horizon_options, latest_daily_demand)
-from app.services.inventory import (calculate_inventory_value, inventory_overview, stockout_risk_count)
+from app.services.inventory import calculate_inventory_value, inventory_overview
 from app.services.suppliers import supplier_product_counts, supplier_product_summary
 
 st.set_page_config(page_title="DistribuSense", page_icon="DS", layout="wide")
@@ -89,6 +90,28 @@ def load_data():
 def load_financial_data():
     return load_accounting_data(ROOT)
 
+
+@st.cache_data
+def cached_forecast(history: pd.Series, horizon: int):
+    return forecast_daily(history, horizon)
+
+
+@st.cache_data
+def cached_inventory_overview(products: pd.DataFrame, sales: pd.DataFrame,
+                              inventory: pd.DataFrame, suppliers: pd.DataFrame,
+                              as_of: date):
+    return inventory_overview(products, sales, inventory, suppliers, as_of=as_of)
+
+
+@st.cache_data
+def cached_alerts(products: pd.DataFrame, sales: pd.DataFrame, inventory: pd.DataFrame,
+                  suppliers: pd.DataFrame, retailer_payments: pd.DataFrame,
+                  purchases: pd.DataFrame, supplier_payments: pd.DataFrame,
+                  retailers: pd.DataFrame, as_of: date):
+    return build_alerts(products, sales, inventory, suppliers, retailer_payments,
+                        purchases, supplier_payments, retailers, as_of_date=as_of, settings=None)
+
+
 try:
     products, sales, inventory, retailers, suppliers = load_data()
     expenses, supplier_payments, purchases, retailer_payments = load_financial_data()
@@ -109,7 +132,9 @@ receivables = retailer_outstanding_balances(sales, retailer_payments, retailers,
 if page == "Executive Dashboard":
     st.title("What needs action today?")
     st.caption(f"Operating view through {sales.date.max().date()}")
-    values = [("Revenue", format_currency(summary["revenue"])), ("Orders", f"{summary['orders']:,}"), ("Units sold", f"{summary['units']:,}"), ("Inventory value", format_currency(calculate_inventory_value(inventory, products))), ("Gross margin", f"{summary['margin']:.1f}%"), ("Active retailers", f"{summary['active_retailers']:,}"), ("Outstanding receivables", format_currency(receivables["outstanding_balance"].sum())), ("Stockout risk", f"{stockout_risk_count(products, sales, inventory, suppliers):,}")]
+    inventory_positions = cached_inventory_overview(products, sales, inventory, suppliers, date.today())
+    stockout_risks = int(inventory_positions["Risk"].isin(["Critical", "High Risk", "Warning"]).sum())
+    values = [("Revenue", format_currency(summary["revenue"])), ("Orders", f"{summary['orders']:,}"), ("Units sold", f"{summary['units']:,}"), ("Inventory value", format_currency(calculate_inventory_value(inventory, products))), ("Gross margin", f"{summary['margin']:.1f}%"), ("Active retailers", f"{summary['active_retailers']:,}"), ("Outstanding receivables", format_currency(receivables["outstanding_balance"].sum())), ("Stockout risk", f"{stockout_risks:,}")]
     for row_start in range(0, len(values), 2):
         cols = st.columns(2)
         for col, (label, value) in zip(cols, values[row_start:row_start + 2]):
@@ -152,24 +177,35 @@ elif page == "Demand Forecast":
     st.title("Demand Forecast")
     selected = st.selectbox("Product", get_product_ids(products))
     horizon = st.select_slider("Forecast horizon", options=get_forecast_horizon_options(), value=30)
-    history = build_product_demand_history(sales, selected)
-    result = forecast_daily(history, horizon)
+    history = build_product_demand_history(sales, selected, sales.date.max())
+    result = cached_forecast(history, horizon)
     actual = history.tail(90).rename("units").reset_index()
     future = pd.DataFrame({"date": result.dates, "units": result.values, "lower": result.lower, "upper": result.upper})
-    st.caption(f"Selected model: {result.model_name} | MAE: {result.mae if result.mae is not None else 'n/a'} | RMSE: {result.rmse if result.rmse is not None else 'n/a'}")
+    metric_cols = st.columns(5)
+    metric_cols[0].metric("Selected model", result.model_name)
+    metric_cols[1].metric(f"Forecast demand ({horizon}d)", f"{result.aggregate_demand:.1f} units")
+    metric_cols[2].metric("Holdout MAE", f"{result.mae:.2f}" if result.mae is not None else "n/a")
+    metric_cols[3].metric("Holdout RMSE", f"{result.rmse:.2f}" if result.rmse is not None else "n/a")
+    metric_cols[4].metric("Holdout MAPE", f"{result.mape:.1f}%" if result.mape is not None else "n/a")
     fig = px.line(actual, x="date", y="units", title=f"{selected} demand")
     fig.add_scatter(x=future.date, y=future.units, mode="lines", name="Forecast")
-    fig.add_scatter(x=future.date, y=future.upper, mode="lines", line=dict(width=0), showlegend=False)
-    fig.add_scatter(x=future.date, y=future.lower, mode="lines", fill="tonexty", line=dict(width=0), name="Confidence band")
+    if result.interval_available:
+        fig.add_scatter(x=future.date, y=future.upper, mode="lines", line=dict(width=0), showlegend=False)
+        fig.add_scatter(x=future.date, y=future.lower, mode="lines", fill="tonexty", line=dict(width=0),
+                        name="Indicative holdout-error range")
+        st.caption(f"Uncertainty display: {result.uncertainty_basis}.")
     st.plotly_chart(fig, use_container_width=True)
 
 elif page in ["Inventory Intelligence", "Reorder Planning"]:
     st.title(page)
-    table = inventory_overview(products, sales, inventory, suppliers)
+    table = cached_inventory_overview(products, sales, inventory, suppliers, date.today())
     if page == "Reorder Planning": table = table[table["Recommended order"] > 0]
-    status_table = table[["Product", "Days left", "Risk", "Recommended order"]].copy()
-    status_table["Days left"] = status_table["Days left"].fillna("n/a")
-    render_status_table(status_table, "Risk")
+    columns = ["Product", "SKU", "Forecast model", "Forecast source", "Forecast demand (30d)",
+               "Forecast MAE", "Forecast RMSE", "Forecast MAPE",
+               "Stock", "Available stock", "Incoming stock", "Safety stock", "Reorder point",
+               "Supplier lead time (days)", "MOQ", "Days left", "Estimated stockout date",
+               "Risk", "Recommended order", "Reason"]
+    st.dataframe(table[columns], use_container_width=True, hide_index=True)
 
 elif page == "Retailer Analytics":
     st.title("Retailer Analytics")
@@ -234,8 +270,8 @@ elif page == "Supplier Analytics":
 
 else:
     st.title("Alert Center")
-    alerts = build_alerts(products, sales, inventory, suppliers, retailer_payments,
-                          purchases, supplier_payments, retailers, settings=None)
+    alerts = cached_alerts(products, sales, inventory, suppliers, retailer_payments,
+                           purchases, supplier_payments, retailers, date.today())
     st.metric("Total alerts", len(alerts))
     selected_severities = st.multiselect("Severity", ["Critical", "High", "Warning"],
                                          default=["Critical", "High", "Warning"])

@@ -14,7 +14,7 @@ def build_alerts(products: pd.DataFrame, sales: pd.DataFrame, inventory: pd.Data
     cutoff = pd.Timestamp(as_of_date) if as_of_date is not None else pd.Timestamp.today().normalize()
     alerts = []
 
-    inventory_view = inventory_overview(products, sales, inventory, suppliers, settings)
+    inventory_view = inventory_overview(products, sales, inventory, suppliers, settings, cutoff.date())
     for _, row in inventory_view[inventory_view["Risk"].isin(["Critical", "High Risk"])].iterrows():
         stockout_date = row["Estimated stockout date"]
         days = max(0, (pd.Timestamp(stockout_date) - cutoff).days) if pd.notna(stockout_date) else None

@@ -27,6 +27,12 @@ class LoginRequest(BaseModel):
 
 
 def _recommendation_payload(recommendation: ReorderRecommendation) -> dict:
+    reason = recommendation.reason
+    forecast_source = ("selected forecast" if "selected forecast" in reason
+                       else "historical-average fallback")
+    forecast_model = None
+    if " using " in reason and " estimates " in reason:
+        forecast_model = reason.split(" using ", 1)[1].split(" estimates ", 1)[0]
     return {
         "id": recommendation.id,
         "product_id": recommendation.product_id,
@@ -40,7 +46,9 @@ def _recommendation_payload(recommendation: ReorderRecommendation) -> dict:
         "recommended_quantity": recommendation.recommended_quantity,
         "modified_quantity": recommendation.modified_quantity,
         "status": recommendation.status,
-        "reason": recommendation.reason,
+        "reason": reason,
+        "forecast_source": forecast_source,
+        "forecast_model": forecast_model,
         "created_at": recommendation.created_at,
         "decided_at": recommendation.decided_at,
     }
@@ -122,7 +130,21 @@ def forecast(product_id: str, horizon: int = 30, _: object = Depends(get_current
         result = forecast_product_from_csv(ROOT, product_id, clamped_horizon)
     except ValueError as exc:
         raise HTTPException(404, str(exc)) from exc
-    return {"product_id": product_id, "model": result.model_name, "mae": result.mae, "rmse": result.rmse, "forecast": [{"date": str(day.date()), "units": units, "lower": lower, "upper": upper} for day, units, lower, upper in zip(result.dates, result.values, result.lower, result.upper)]}
+    return {
+        "product_id": product_id,
+        "horizon": result.horizon,
+        "aggregate_demand": result.aggregate_demand,
+        "model": result.model_name,
+        "mae": result.mae,
+        "rmse": result.rmse,
+        "mape": result.mape,
+        "interval_available": result.interval_available,
+        "uncertainty_basis": result.uncertainty_basis,
+        "forecast": [
+            {"date": str(day.date()), "units": units, "lower": lower, "upper": upper}
+            for day, units, lower, upper in zip(result.dates, result.values, result.lower, result.upper)
+        ],
+    }
 
 
 @app.post("/data/upload")

@@ -10,7 +10,7 @@ from app.models.domain import Brand, Category, InventoryStock, Product, Retailer
 from app.services.auth import get_current_user
 
 
-def test_recommendation_lifecycle_is_persisted():
+def test_recommendation_lifecycle_is_persisted(monkeypatch):
     """Generates, queries, modifies, approves, and re-queries one recommendation."""
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
     Base.metadata.create_all(engine)
@@ -37,8 +37,11 @@ def test_recommendation_lifecycle_is_persisted():
         db.add(product)
         db.flush()
         db.add(InventoryStock(product_id=product.id, quantity=10, reserved_quantity=0))
-        db.add(Sale(sale_date=date.today() - timedelta(days=10), product_id=product.id, retailer_id=retailer.id,
-                    quantity=20, selling_price=15, purchase_cost=10))
+        db.add_all([
+            Sale(sale_date=date.today() - timedelta(days=offset), product_id=product.id,
+                 retailer_id=retailer.id, quantity=20, selling_price=15, purchase_cost=10)
+            for offset in range(11)
+        ])
         db.commit()
 
     client = TestClient(app)
@@ -49,6 +52,20 @@ def test_recommendation_lifecycle_is_persisted():
     assert generated["current_stock"] == 10
     assert generated["forecast_demand"] > 0
     assert generated["reason"]
+    assert generated["forecast_source"] == "selected forecast"
+    assert generated["forecast_model"]
+
+    from app.services import recommendations
+
+    def fail_forecast(*args, **kwargs):
+        raise RuntimeError("synthetic model failure")
+
+    monkeypatch.setattr(recommendations, "forecast_daily", fail_forecast)
+    fallback_response = client.post("/reorder-recommendations/generate")
+    assert fallback_response.status_code == 200
+    fallback = fallback_response.json()["recommendations"][0]
+    assert fallback["forecast_source"] == "historical-average fallback"
+    assert fallback["forecast_model"] is None
 
     listed_response = client.get("/reorder-recommendations?status=generated")
     assert listed_response.status_code == 200

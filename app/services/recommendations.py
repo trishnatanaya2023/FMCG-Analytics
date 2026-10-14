@@ -1,22 +1,40 @@
 from datetime import date, datetime, timezone
 from decimal import Decimal
+import logging
+
+import numpy as np
 import pandas as pd
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.domain import InventoryStock, Product, ReorderRecommendation, Sale
+from app.services.forecasting import build_product_demand_history, forecast_daily
 from app.services.inventory import InventoryPolicy, calculate_inventory_position
 
+logger = logging.getLogger(__name__)
 
-def _forecast_demand(db: Session, product_id: int, as_of: date) -> tuple[list[float], float]:
-    rows = db.scalars(select(Sale).where(Sale.product_id == product_id, Sale.sale_date <= as_of)).all()
+
+def _forecast_demand(
+    db: Session, product_id: int, as_of: date
+) -> tuple[list[float], float, list[float] | None, str | None, str]:
+    rows = db.execute(select(Sale.sale_date, Sale.quantity).where(
+        Sale.product_id == product_id, Sale.sale_date <= as_of)).all()
     if not rows:
-        return [], 0.0
-    sales = pd.DataFrame({"date": [row.sale_date for row in rows], "quantity": [row.quantity for row in rows]})
-    daily = sales.groupby("date")["quantity"].sum()
-    history = daily.reindex(pd.date_range(daily.index.min(), as_of, freq="D"), fill_value=0)
-    average = float(history.tail(30).mean()) if len(history) else 0.0
-    return history.tail(30).astype(float).tolist(), max(0.0, average * 30)
+        return [], 0.0, None, None, "historical-average fallback"
+    sales = pd.DataFrame({"date": [row.sale_date for row in rows],
+                          "product_id": product_id,
+                          "quantity": [row.quantity for row in rows]})
+    history = build_product_demand_history(sales, product_id, as_of)
+    history_values = history.tail(60).astype(float).tolist()
+    historical_demand = max(0.0, float(history.tail(30).mean()) * 30)
+    if len(history) < 2:
+        return history.tail(30).astype(float).tolist(), historical_demand, None, None, "historical-average fallback"
+    try:
+        result = forecast_daily(history, 60)
+    except (ValueError, RuntimeError, np.linalg.LinAlgError, FloatingPointError) as exc:
+        logger.warning("Forecast failed for product %s; using historical average: %s", product_id, exc)
+        return history.tail(30).astype(float).tolist(), historical_demand, None, None, "historical-average fallback"
+    return history_values, sum(result.values[:30]), result.values, result.model_name, "selected forecast"
 
 
 def generate_recommendations(db: Session, as_of: date | None = None) -> list[ReorderRecommendation]:
@@ -25,13 +43,18 @@ def generate_recommendations(db: Session, as_of: date | None = None) -> list[Reo
     with db.begin():
         products = db.scalars(select(Product).where(Product.active.is_(True))).all()
         for product in products:
-            demand_history, forecast_demand = _forecast_demand(db, product.id, as_of)
+            demand_history, forecast_demand, forecast_values, forecast_model, forecast_source = _forecast_demand(
+                db, product.id, as_of)
             stock = db.scalar(select(InventoryStock).where(InventoryStock.product_id == product.id))
             current_stock = stock.quantity if stock else 0
             reserved_stock = stock.reserved_quantity if stock else 0
             policy = InventoryPolicy(product.supplier.lead_time_days, 3, product.supplier.minimum_order_quantity)
-            position = calculate_inventory_position(current_stock, reserved_stock, 0, demand_history,
-                                                    forecast_demand, policy, as_of)
+            position = calculate_inventory_position(
+                current_stock, reserved_stock, 0, demand_history, forecast_demand, policy, as_of,
+                forecast_values=forecast_values,
+                forecast_model=forecast_model,
+                forecast_source=forecast_source,
+            )
             latest = db.scalar(select(ReorderRecommendation).where(
                 ReorderRecommendation.product_id == product.id,
                 ReorderRecommendation.status == "generated").order_by(ReorderRecommendation.created_at.desc()))

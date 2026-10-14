@@ -113,13 +113,21 @@ Status values throughout Inventory Intelligence, Retailer Analytics, Supplier An
 
 ### Demand forecasting
 
-`forecast_daily` prepares a daily demand series and fills missing dates with zero demand. It evaluates chronological 80/20 holdout performance for:
+`forecast_daily` prepares a continuous daily demand series and fills missing dates with zero demand. It compares these candidates on the same chronological 80/20 holdout:
 
-- Naive last-value forecast
-- Seven-day moving average
+- Naive last-value baseline
 - Additive damped-trend exponential smoothing
+- A per-SKU scikit-learn `RandomForestRegressor`
 
-The model with the lowest holdout MAE is selected. Forecast results expose the model name, MAE, RMSE, forecast values, and uncertainty bounds.
+The Random Forest is trained on supervised, one-day-ahead examples built from 1-, 7-, and 14-day lags; trailing 7- and 28-day means; trailing 28-day sample deviation; and target weekday. Every feature row uses only demand observed before its target date. Since each model is fit separately for one SKU, SKU identity is represented by the per-SKU model rather than a constant, uninformative SKU feature. The fixed forest configuration uses 200 trees, leaf size 2, `max_features=0.8`, and random seed 42. Multi-step prediction is recursive: each predicted day is fed into the next day's lag and rolling features.
+
+Holdout forecasts are generated recursively from the training partition only; no actual holdout values enter later prediction inputs. The model with the lowest valid holdout MAE is selected, then refit on the complete observed history. MAE and RMSE are reported; MAPE is omitted when any holdout actual is zero. An indicative range, when a holdout exists, uses its 95th-percentile absolute error and is explicitly not a calibrated prediction interval. Cached forecasts are keyed by the exact daily history and horizon, so changed sales do not reuse stale results.
+
+Forecasts feed inventory overview and persisted reorder recommendations. For products with usable history, the calculation uses the selected 60-day forecast for expected 30-day planning demand and lead-time demand, while retaining demand variability, safety-stock, reserved stock, incoming stock, and supplier MOQ rules. Products with insufficient history or a forecast failure use the previous recent-average calculation; the source and selected model (when applicable) are included in the recommendation reason and API payload. The existing recommendation table is unchanged.
+
+### Reproducible forecast benchmark
+
+Run `python -m scripts.evaluate_forecast` to create `reports/forecast-performance.md`, `reports/forecast-performance-summary.csv`, and `reports/forecast-performance-per-sku.csv` from the existing `data/products.csv` and `data/sales.csv`. The evaluator selects each SKU's model on a chronological validation window, then compares all three models and the selected strategy on a later untouched test window using the same eligible SKU-days. It records input SHA-256 hashes, window dates, exclusions, aggregate WAPE/MAE/RMSE, and per-SKU metrics. The default windows are 30 validation days and 30 test days, with at least 60 pre-test history days. Results describe this one held-out period only; rolling-origin evaluation is recommended before making general performance claims.
 
 ### Inventory policy
 
